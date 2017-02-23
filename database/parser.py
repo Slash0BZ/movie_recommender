@@ -11,8 +11,6 @@ def import_movie():
 		count = count + 1
 		if (count == 1):
 			continue
-		if (count > 10):
-			break
 		line = line.replace("\r\n", "")
 		featureList = line.split(',')
 

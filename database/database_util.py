@@ -1,3 +1,6 @@
+#
+# This is the databse utilities
+#
 import pyodbc
 import secret
 import datetime
