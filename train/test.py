@@ -1,6 +1,6 @@
 import mrlib
 
-l = mrlib.Genre2BinaryLearner(1)
-
-l.train()
-print l.test()
+for i in range (1, 51):
+	l = mrlib.Genre2BinaryLearner(i)
+	l.train()
+	l.test()

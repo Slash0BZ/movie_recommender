@@ -1,5 +1,9 @@
 import re
 from sklearn import svm
+from sklearn import linear_model
+from sklearn.kernel_approximation import RBFSampler
+from sklearn.naive_bayes import GaussianNB
+
 class Parser:
 	
 	movie_file = "../data/movies.csv"
@@ -99,7 +103,7 @@ class Genre2BinaryLearner:
 	Train_ClassList = []
 	Test_GenreList = []
 	Test_ClassList = []
-	clf = svm.SVC()
+	learner = svm.SVC()
 
 	def __init__(self, u_id):
 		self.u_id = u_id
@@ -124,21 +128,26 @@ class Genre2BinaryLearner:
 	def splitTrainTest(self):
 		trainNum = int(len(self.ClassList) * 0.9)
 		testNum = len(self.ClassList) - trainNum
+		rbf_feature = RBFSampler(gamma=1, random_state=1)
+		#self.GenreList = rbf_feature.fit_transform(self.GenreList)
 		self.Train_GenreList = self.GenreList[0:trainNum]
 		self.Train_ClassList = self.ClassList[0:trainNum]
 		self.Test_GenreList = self.GenreList[trainNum:]
 		self.Test_ClassList = self.ClassList[trainNum:]
 
 	def train(self):
-		self.clf.fit(self.Train_GenreList, self.Train_ClassList)
+		self.learner.fit(self.Train_GenreList, self.Train_ClassList)
 
 	def test(self):
-		output = self.clf.predict(self.Test_GenreList)
-		print "Desired"
-		print self.Test_ClassList
-		print "Trained"
-		print output
+		output = self.learner.predict(self.Test_GenreList)
+		total = len(output)
+		correct = 0.0
+		for i in range (0, len(output)):
+			if (output[i] == self.Test_ClassList[i]):
+				correct = correct + 1.0
 
+		print "Test on uid " + str(self.u_id)
+		print "correctness: " + str(correct / total)
 			
 
 	
