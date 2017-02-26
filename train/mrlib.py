@@ -3,16 +3,19 @@ from sklearn import svm
 from sklearn import linear_model
 from sklearn.kernel_approximation import RBFSampler
 from sklearn.naive_bayes import GaussianNB
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import cross_val_score
 
 class Parser:
 	
-	movie_file = "../data/movies.csv"
-	rating_file = "../data/ratings.csv"
+	data_path = "../data/"
+	movie_file = data_path + "movies.csv"
+	rating_file = data_path + "ratings.csv"
+	tag_file = data_path + "genome-scores.csv"
 	genreList = ['Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy', 'Romance', 'Drama', 'Action', 'Crime', 'Thriller', 'Horror', 'Mystery', 'Sci-Fi', 'IMAX', 'Documentary', 'War', 'Musical', 'Western', 'Film-Noir', '(no genres listed)']
 
-	def __init__(self, _movie_file = movie_file, _rating_file = rating_file):
-		self.movie_file = _movie_file
-		self.rating_file = _rating_file
+	def __init__(self, _data_path = data_path):
+		self.data_path = _data_path
 	
 	def pre_process_line(self, line):
 		line = line.replace("\r\n", "")
@@ -82,7 +85,6 @@ class Parser:
 	
 	def get_movie_genre_vector(self, m_id):
 		count = 0
-		ret_vec = list()
 		fp = open(self.movie_file, 'r')
 		for line in fp:
 			count = count + 1
@@ -93,6 +95,40 @@ class Parser:
 				return self.genre2vec(genre)
 		fp.close()
 		return list()
+	
+	def parse_tag_entry(self, line):
+		line = self.pre_process_line(line)
+		group = line.split(",")
+		return [group[0], group[1], group[2]]
+
+	def tag2vec(self, tags):
+		if (len(tags) != 1128):
+			print "Invalid tag file"
+			return list()
+		ret = list()
+		for (t,s) in tags:
+			ret.append(s)
+		return ret
+
+	def get_movie_tag_vector(self, m_id):
+		count = 0
+		fp = open(self.tag_file, 'r')
+		tags = list()
+		foundFlag = False
+		for line in fp:
+			count = count + 1
+			if (count == 1):
+				continue
+			[c_m_id, t_id, score] = self.parse_tag_entry(line)
+			if (m_id == int(c_m_id)):
+				foundFlag = True
+				tags.append((t_id, score))
+			if (m_id != int(c_m_id) and foundFlag):
+				break
+		fp.close()
+		return self.tag2vec(tags)
+
+			
 
 class Genre2BinaryLearner:
 	
@@ -103,7 +139,7 @@ class Genre2BinaryLearner:
 	Train_ClassList = []
 	Test_GenreList = []
 	Test_ClassList = []
-	learner = svm.SVC()
+	learner = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
 
 	def __init__(self, u_id):
 		self.u_id = u_id
@@ -128,7 +164,7 @@ class Genre2BinaryLearner:
 	def splitTrainTest(self):
 		trainNum = int(len(self.ClassList) * 0.9)
 		testNum = len(self.ClassList) - trainNum
-		rbf_feature = RBFSampler(gamma=1, random_state=1)
+		#rbf_feature = RBFSampler(gamma=1, random_state=1)
 		#self.GenreList = rbf_feature.fit_transform(self.GenreList)
 		self.Train_GenreList = self.GenreList[0:trainNum]
 		self.Train_ClassList = self.ClassList[0:trainNum]
@@ -148,7 +184,82 @@ class Genre2BinaryLearner:
 
 		print "Test on uid " + str(self.u_id)
 		print "correctness: " + str(correct / total)
+	
+	def crossValidation(self):
+		print cross_val_score(self.learner, self.GenreList, self.ClassList, scoring='accuracy')
 			
 
 	
-			
+class Tag2BinaryLearner:
+	
+	u_id = 0
+	TagList = []
+	ClassList = []
+	Train_TagList = []
+	Train_ClassList = []
+	Test_TagList = []
+	Test_ClassList = []
+	learner = svm.SVC()
+
+	def __init__(self, u_id):
+		self.u_id = u_id
+		self.fillParameters()
+		self.splitTrainTest()
+		print "Init Completion"
+	
+	def fillParameters(self):
+		parser = Parser()
+		(ml, rl) = parser.get_user_history(self.u_id)
+
+		count = 0
+		print "Getting total " + str((len(ml))) + " vectors"
+		for m in ml:
+			count = count + 1
+			print count
+			self.TagList.append(parser.get_movie_tag_vector(int(m)))
+
+		d_rl = [float(i) for i in rl]
+		averageRating = sum(d_rl) / len(d_rl)
+		for r in d_rl:
+			Output = 0.0
+			if (r >= averageRating):
+				Output = 1.0
+			self.ClassList.append(Output)
+
+	def splitTrainTest(self):
+		trainNum = int(len(self.ClassList) * 0.9)
+		testNum = len(self.ClassList) - trainNum
+		self.Train_TagList = self.TagList[0:trainNum]
+		self.Train_ClassList = self.ClassList[0:trainNum]
+		self.Test_TagList = self.TagList[trainNum:]
+		self.Test_ClassList = self.ClassList[trainNum:]
+
+	def train(self):
+		self.learner.fit(self.Train_TagList, self.Train_ClassList)
+
+	def test(self):
+		output = self.learner.predict(self.Test_TagList)
+		total = len(output)
+		correct = 0.0
+		for i in range (0, len(output)):
+			if (output[i] == self.Test_ClassList[i]):
+				correct = correct + 1.0
+
+		print "Test on uid " + str(self.u_id)
+		print "correctness: " + str(correct / total)
+	
+	def scoreSet(self):
+		print self.learner.predict_proba(self.Test_TagList)
+
+	def crossValidation(self):
+		print cross_val_score(self.learner, self.TagList, self.ClassList, scoring='accuracy')
+
+
+
+
+
+
+
+
+
+
