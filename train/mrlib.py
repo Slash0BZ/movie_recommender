@@ -1,4 +1,5 @@
 import re
+from sklearn import svm
 class Parser:
 	
 	movie_file = "../data/movies.csv"
@@ -70,9 +71,9 @@ class Parser:
 		ret = list()
 		for g in self.genreList:
 			if g in gl:
-				ret.append(1)
+				ret.append(1.0)
 			else:
-				ret.append(0)
+				ret.append(0.0)
 		return ret
 	
 	def get_movie_genre_vector(self, m_id):
@@ -88,4 +89,57 @@ class Parser:
 				return self.genre2vec(genre)
 		fp.close()
 		return list()
+
+class Genre2BinaryLearner:
+	
+	u_id = 0
+	GenreList = []
+	ClassList = []
+	Train_GenreList = []
+	Train_ClassList = []
+	Test_GenreList = []
+	Test_ClassList = []
+	clf = svm.SVC()
+
+	def __init__(self, u_id):
+		self.u_id = u_id
+		self.fillParameters()
+		self.splitTrainTest()
+
+	def fillParameters(self):
+		parser = Parser()
+		(ml, rl) = parser.get_user_history(self.u_id)
+		
+		for m in ml:
+			self.GenreList.append(parser.get_movie_genre_vector(int(m)))
+
+		d_rl = [float(i) for i in rl]
+		averageRating = sum(d_rl) / len(d_rl)
+		for r in d_rl:
+			Output = 0.0
+			if (r >= averageRating):
+				Output = 1.0
+			self.ClassList.append(Output)
+	
+	def splitTrainTest(self):
+		trainNum = int(len(self.ClassList) * 0.9)
+		testNum = len(self.ClassList) - trainNum
+		self.Train_GenreList = self.GenreList[0:trainNum]
+		self.Train_ClassList = self.ClassList[0:trainNum]
+		self.Test_GenreList = self.GenreList[trainNum:]
+		self.Test_ClassList = self.ClassList[trainNum:]
+
+	def train(self):
+		self.clf.fit(self.Train_GenreList, self.Train_ClassList)
+
+	def test(self):
+		output = self.clf.predict(self.Test_GenreList)
+		print "Desired"
+		print self.Test_ClassList
+		print "Trained"
+		print output
+
+			
+
+	
 			
