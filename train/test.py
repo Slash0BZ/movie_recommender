@@ -1,8 +1,18 @@
 import mrlib
 
 
-p = mrlib.Parser()
+def initTest():
 
-l = mrlib.Tag2BinaryLearner(4)
-l.train()
-l.scoreSet()
+	tl = mrlib.Tag2BinaryLearner(8)
+	gl = mrlib.Genre2BinaryLearner(8)
+
+	tl.train()
+	tl.test()
+
+	gl.train()
+	gl.test()
+
+cl = mrlib.Combined2BinaryLearner(8)
+cl.train()
+cl.test()
+cl.scoreSet()

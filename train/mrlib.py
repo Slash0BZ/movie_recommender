@@ -1,4 +1,5 @@
 import re
+import numpy as np
 from sklearn import svm
 from sklearn import linear_model
 from sklearn.kernel_approximation import RBFSampler
@@ -124,6 +125,7 @@ class Parser:
 				foundFlag = True
 				tags.append((t_id, score))
 			if (m_id != int(c_m_id) and foundFlag):
+				foundFlag = True
 				break
 		fp.close()
 		return self.tag2vec(tags)
@@ -199,7 +201,7 @@ class Tag2BinaryLearner:
 	Train_ClassList = []
 	Test_TagList = []
 	Test_ClassList = []
-	learner = svm.SVC()
+	learner = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
 
 	def __init__(self, u_id):
 		self.u_id = u_id
@@ -235,10 +237,15 @@ class Tag2BinaryLearner:
 		self.Test_ClassList = self.ClassList[trainNum:]
 
 	def train(self):
-		self.learner.fit(self.Train_TagList, self.Train_ClassList)
+		assert(len(self.Train_TagList) == len(self.Train_ClassList))
+		f = np.array(self.Train_TagList).astype('float32')		
+		t = np.array(self.Train_ClassList).astype('float32')		
+		print f.dtype
+		self.learner.fit(f, t)
 
 	def test(self):
-		output = self.learner.predict(self.Test_TagList)
+		f = np.array(self.Test_TagList).astype('float32')		
+		output = self.learner.predict(f)
 		total = len(output)
 		correct = 0.0
 		for i in range (0, len(output)):
@@ -249,10 +256,94 @@ class Tag2BinaryLearner:
 		print "correctness: " + str(correct / total)
 	
 	def scoreSet(self):
-		print self.learner.predict_proba(self.Test_TagList)
+		f = np.array(self.Test_TagList).astype('float32')		
+		print self.learner.classes_
+		print self.learner.predict_proba(f)
+		print self.Test_ClassList
 
 	def crossValidation(self):
 		print cross_val_score(self.learner, self.TagList, self.ClassList, scoring='accuracy')
+
+class Combined2BinaryLearner:
+	
+	u_id = 0
+	FeatureList = []
+	ClassList = []
+	Train_FeatureList = []
+	Train_ClassList = []
+	Test_FeatureList = []
+	Test_ClassList = []
+	learner = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+
+	def __init__(self, u_id):
+		self.u_id = u_id
+		self.fillParameters()
+		self.splitTrainTest()
+		print "Init Completion"
+	
+	def fillParameters(self):
+		parser = Parser()
+		(ml, rl) = parser.get_user_history(self.u_id)
+
+		count = 0
+		for m in ml:
+			count = count + 1
+			featureVec = parser.get_movie_tag_vector(int(m)) + parser.get_movie_genre_vector(int(m))
+			self.FeatureList.append(featureVec)
+
+		d_rl = [float(i) for i in rl]
+		averageRating = sum(d_rl) / len(d_rl)
+		for r in d_rl:
+			Output = 0.0
+			if (r >= averageRating):
+				Output = 1.0
+			self.ClassList.append(Output)
+
+	def splitTrainTest(self):
+		trainNum = int(len(self.ClassList) * 0.9)
+		testNum = len(self.ClassList) - trainNum
+		self.Train_FeatureList = self.FeatureList[0:trainNum]
+		self.Train_ClassList = self.ClassList[0:trainNum]
+		self.Test_FeatureList = self.FeatureList[trainNum:]
+		self.Test_ClassList = self.ClassList[trainNum:]
+
+	def train(self):
+		assert(len(self.Train_FeatureList) == len(self.Train_ClassList))
+		f = np.array(self.Train_FeatureList).astype('float32')		
+		t = np.array(self.Train_ClassList).astype('float32')		
+		print f.dtype
+		self.learner.fit(f, t)
+
+	def test(self):
+		f = np.array(self.Test_FeatureList).astype('float32')		
+		output = self.learner.predict(f)
+		total = len(output)
+		correct = 0.0
+		for i in range (0, len(output)):
+			if (output[i] == self.Test_ClassList[i]):
+				correct = correct + 1.0
+
+		print "Test on uid " + str(self.u_id)
+		print "correctness: " + str(correct / total)
+	
+	def scoreSet(self):
+		f = np.array(self.Test_FeatureList).astype('float32')		
+		print self.learner.classes_
+		print self.learner.predict_proba(f)
+		print self.Test_ClassList
+
+	def crossValidation(self):
+		print cross_val_score(self.learner, self.FeatureList, self.ClassList, scoring='accuracy')
+
+
+
+
+
+
+
+
+
+
 
 
 
