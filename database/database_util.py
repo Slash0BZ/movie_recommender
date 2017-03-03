@@ -72,6 +72,14 @@ class database:
 		self.cursor.execute("INSERT INTO movie_info (id,name,genre,year) VALUES (?,?,?,?)",m_id, name, genre, year)
 		self.cnxn.commit()
 		self.write_log("INSERT movie_info %s %s %s" % (name, genre, year))
+	
+	def get_all_movie_id(self):
+		self.cursor.execute("SELECT id FROM movie_info")
+		arr = self.cursor.fetchall()
+		ret = list()
+		for a in arr:
+			ret.append(a[0])
+		return ret
 
 	# Create a new column in the specified table
 	# Do nothing if the column_name is invalid or already exists
@@ -80,6 +88,27 @@ class database:
 	def create_column(self, table_name, column_name, column_type):
 		# TO DO
 		self.cursor.execute("ALTER TABLE ? ADD ? ?", table_name, column_name, column_type)
+	
+	def add_feature_to_movie(self, m_id, imdb_id, feature):
+		self.cursor.execute("UPDATE movie_info SET imdb_id=?, tag_feature=? WHERE id=?", imdb_id, feature, m_id)
+		self.cnxn.commit()
+
+	def a2s(self, arr):
+		ret = ''
+		for a in arr:
+			a = float(a)
+			a = a * 100.0
+			ret = ret + "|" + str(a)
+		return ret
+	
+	def s2a(self, s):
+		group = s.split("|")
+		ret = list()
+		for g in group:
+			if (g == ''):
+				continue
+			ret.append(float(g) / 100.0)
+		return ret
 
 	# Add info to the specifies rows in the specifies column with value	
 	#def add_movie_additional(self, m_id, column_name, value):
