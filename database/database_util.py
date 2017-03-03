@@ -88,6 +88,10 @@ class database:
 	def create_column(self, table_name, column_name, column_type):
 		# TO DO
 		self.cursor.execute("ALTER TABLE ? ADD ? ?", table_name, column_name, column_type)
+	
+	def add_feature_to_movie(self, m_id, imdb_id, feature):
+		self.cursor.execute("UPDATE movie_info SET imdb_id=?, tag_feature=? WHERE id=?", imdb_id, feature, m_id)
+		self.cnxn.commit()
 
 	def a2s(self, arr):
 		ret = ''

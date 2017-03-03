@@ -13,6 +13,9 @@ class Parser:
 	movie_file = data_path + "movies.csv"
 	rating_file = data_path + "ratings.csv"
 	tag_file = data_path + "genome-scores.csv"
+	link_file = data_path + "links.csv"
+	tag_file_list = ['scores/scores_2036.csv', 'scores/scores_4010.csv', 'scores/scores_6214.csv', 'scores/scores_27073.csv', 'scores/scores_71926.csv', 'scores/scores_rest.csv']
+	tag_file_list = map(lambda x : "../data/" + x, tag_file_list)
 	genreList = ['Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy', 'Romance', 'Drama', 'Action', 'Crime', 'Thriller', 'Horror', 'Mystery', 'Sci-Fi', 'IMAX', 'Documentary', 'War', 'Musical', 'Western', 'Film-Noir', '(no genres listed)']
 
 	def __init__(self, _data_path = data_path):
@@ -130,6 +133,61 @@ class Parser:
 		fp.close()
 		return self.tag2vec(tags)
 
+	def get_movie_tag_vector_fast(self, m_id):
+		m_id = int(m_id)
+		f = ''
+		if m_id <= 2036:
+			f = self.tag_file_list[0]
+		else:
+			if m_id <= 4010:
+				f = self.tag_file_list[1]
+			else:
+				if m_id <= 6214:
+					f = self.tag_file_list[2]
+				else:
+					if m_id <= 27073:
+						f = self.tag_file_list[3]
+					else:
+						if m_id <= 71926:
+							f = self.tag_file_list[4]
+						else:
+							f = self.tag_file_list[5]
+		fp = open(f, 'r')
+		tags = list()
+		foundFlag = False
+		for line in fp:
+			[c_m_id, t_id, score] = self.parse_tag_entry(line)
+			if (m_id == int(c_m_id)):
+				foundFlag = True
+				tags.append((t_id, score))
+			if (int(c_m_id) > m_id and !foundFlag):
+				break
+			if (m_id != int(c_m_id) and foundFlag):
+				foundFlag = True
+				break
+		fp.close()
+		return self.tag2vec(tags)
+	
+	def parse_link_entry(self, line):
+		line = self.pre_process_line(line)
+		group = line.split(',')
+		return [group[0], group[1], group[2]]
+	
+	def get_movie_imdb_id(self, m_id):
+		count = 0
+		fp = open(self.link_file, 'r')
+		ret = 0
+		for line in fp:
+			count = count + 1
+			if (count == 1):
+				continue
+			[c_m_id, imdb_id, tmdb_id] = self.parse_link_entry(line)
+			if (m_id == int(c_m_id)):
+				ret = imdb_id
+				break
+		fp.close()
+		return int(ret)
+
 			
 
 class Genre2BinaryLearner:
@@ -219,6 +277,7 @@ class Tag2BinaryLearner:
 			count = count + 1
 			print count
 			self.TagList.append(parser.get_movie_tag_vector(int(m)))
+			print parser.get_movie_tag_vector(int(m));
 
 		d_rl = [float(i) for i in rl]
 		averageRating = sum(d_rl) / len(d_rl)

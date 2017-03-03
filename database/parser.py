@@ -34,8 +34,17 @@ def import_movie():
 			year = ""
 		db.add_movie(m_id, name, genre, year)
 	f.close()
+
+
 	
 def import_feature():
 	m_id = db.get_all_movie_id()
+	parser = mrlib.Parser()
+	for i in m_id:
+		print i
+		feature = db.a2s(parser.get_movie_tag_vector_fast(int(i)))
+		imdb_id = parser.get_movie_imdb_id(int(i))
+		db.add_feature_to_movie(i, imdb_id, feature)
+		
 
 import_feature()
