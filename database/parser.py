@@ -1,5 +1,8 @@
 import database_util
 import re
+import sys
+sys.path.insert(0, '../train')
+import mrlib
 
 db = database_util.database()
 movie_info_file = '../data/movies.csv'
@@ -32,4 +35,7 @@ def import_movie():
 		db.add_movie(m_id, name, genre, year)
 	f.close()
 	
-import_movie()
+def import_feature():
+	m_id = db.get_all_movie_id()
+
+import_feature()
