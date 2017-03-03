@@ -109,6 +109,11 @@ class database:
 				continue
 			ret.append(float(g) / 100.0)
 		return ret
+	
+	def get_movie_info(self, m_id):
+		self.cursor.execute("SELECT * FROM movie_info WHERE id=?", m_id)
+		row = self.cursor.fetchone()
+		return row
 
 	# Add info to the specifies rows in the specifies column with value	
 	#def add_movie_additional(self, m_id, column_name, value):
