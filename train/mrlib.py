@@ -160,7 +160,7 @@ class Parser:
 			if (m_id == int(c_m_id)):
 				foundFlag = True
 				tags.append((t_id, score))
-			if (int(c_m_id) > m_id and !foundFlag):
+			if (int(c_m_id) > m_id and foundFlag = False):
 				break
 			if (m_id != int(c_m_id) and foundFlag):
 				foundFlag = True
