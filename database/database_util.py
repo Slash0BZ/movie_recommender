@@ -91,8 +91,10 @@ class database:
 
 	# Add user history into user_history table
 	# Write log after the operation finishes
-	def add_user_history(self, u_id, m_id, rating):
-		time = str(datetime.datetime.now())
-		self.cursor.execute("INSERT INTO user_history (user_id,movie_id,rating,timestamp) VALUES (?,?,?,?)",u_id, m_id, rating, time)
-		self.cnxn.commit()
-		self.write_log("INSERT user_history %s %s %s %s" % (u_id, m_id, rating, time))
+	def add_user_history(self, u_id, m_id, rating, timestamp):
+		self.cursor.execute("SELECT * FROM user_history WHERE u_id=? AND m_id=?", u_id, m_id)
+		print(len(self.cursor.fetchall()))
+
+#		self.cursor.execute("INSERT INTO user_history (user_id,movie_id,rating,timestamp) VALUES (?,?,?,?)",u_id, m_id, rating, time)
+#		self.cnxn.commit()
+#		self.write_log("INSERT user_history %s %s %s %s" % (u_id, m_id, rating, time))
