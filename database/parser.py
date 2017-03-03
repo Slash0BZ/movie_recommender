@@ -45,6 +45,3 @@ def import_feature():
 		feature = db.a2s(parser.get_movie_tag_vector_fast(int(i)))
 		imdb_id = parser.get_movie_imdb_id(int(i))
 		db.add_feature_to_movie(i, imdb_id, feature)
-		
-
-import_feature()
