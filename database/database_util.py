@@ -117,3 +117,22 @@ class database:
 
 	# Add info to the specifies rows in the specifies column with value	
 	#def add_movie_additional(self, m_id, column_name, value):
+
+
+
+
+
+
+	# Add user history into user_history table
+	# Write log after the operation finishes
+	def add_user_history(self, u_id, m_id, rating, timestamp):
+		self.cursor.execute("SELECT * FROM user_history WHERE u_id=? AND m_id=?", u_id, m_id)
+		if len(self.cursor.fetchall()) == 0:
+			self.cursor.execute("INSERT INTO user_history (u_id,m_id,rating,timestamp) VALUES (?,?,?,?)",u_id, m_id, rating, timestamp)
+			self.cnxn.commit()
+			self.write_log("INSERT user_history %s %s %s %s" % (u_id, m_id, rating, timestamp))
+		else:
+			self.cursor.execute("UPDATE user_history SET rating=?,timestamp=? WHERE u_id=? AND m_id=?", rating, timestamp, u_id, m_id)
+			self.cnxn.commit()
+			self.write_log("UPDATE user_history %s %s %s %s" % (u_id, m_id, rating, timestamp))
+		
