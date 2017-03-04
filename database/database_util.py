@@ -136,3 +136,7 @@ class database:
 			self.cnxn.commit()
 			self.write_log("UPDATE user_history %s %s %s %s" % (u_id, m_id, rating, timestamp))
 		
+	#get user history from user_history table
+	def get_user_history(self, u_id):
+		self.cursor.execute("SELECT * FROM user_history WHERE u_id=?", u_id)
+		return self.cursor.fetchall()
