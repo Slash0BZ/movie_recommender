@@ -24,6 +24,7 @@ class Learner:
 	tag_features = list()
 	genre_learner = svm.SVC(probability=True)
 	tag_learner = svm.SVC(probability=True)
+	average_rating = 0.0
 
 	def __init__(self, _u_id):
 		self.u_id = _u_id
@@ -36,6 +37,8 @@ class Learner:
 
 	def getFeatures(self):
 		history = self.db.get_user_history(self.u_id)
+		if (len(history) < 2):
+			self.processError(1)	
 
 		for h in history:
 			self.movies.append(h[1])
@@ -58,7 +61,11 @@ class Learner:
 		# This causes learner to raise an error
 		# Temp solution: check condition in training and saving
 		for r in self.ratings:
-			if (float(r) > 3):
+			self.average_rating = self.average_rating + float(r)
+		self.average_rating = self.average_rating / float(len(self.ratings))
+
+		for r in self.ratings:
+			if (float(r) > self.average_rating):
 				self.classes.append(1.0)
 			else:
 				self.classes.append(0.0)
@@ -80,6 +87,11 @@ class Learner:
 		# 0: Feature is not valid
 		if (error_code == 0):
 			print "[ERROR]: Feature set is not valid"
+		# 1: history length is too short
+		if (error_code == 1):
+			print "[ERROR]: Insufficient history"
+		else:
+			print "[ERROR]: Unknown error"
 	
 	def train_genre(self):
 		self.genre_learner.fit(self.genre_features, self.classes)				
@@ -87,7 +99,7 @@ class Learner:
 	def train_tag(self):
 		assert(len(self.tag_features) == len(self.classes))
 		for t in self.tag_features:
-			assert(len(self.tag_features) == 1128)
+			assert(len(t) == 1128)
 		self.tag_learner.fit(self.tag_features, self.classes)
 	
 	def onlyOneClass(self):
@@ -112,7 +124,7 @@ class Learner:
 
 		#genre_model = base64.b64encode(genre_model)
 		#tag_model = base64.b64encode(tag_model)
-		self.db.add_user_model(self.u_id, genre_model, tag_model)
+		self.db.add_user_model(self.u_id, genre_model, tag_model, self.average_rating)
 		
 
 
@@ -160,29 +172,41 @@ class Predictor:
 			print "[ERROR]: Candidate movie list is empty"
 		if (error_code == 1):
 			print "[ERROR]: Only one class has been speicified by user"
+		if (error_code == 2):
+			print "[ERROR]: Failed to find class 1.0 in learner"
+		else:
+			print "[ERROR]: Unknown error"
 	
 	# return a score of a movie
 	def score(self, m_id):
-		# TODO: gives the same score now
-		# Might be buggy
-		print "Scoring: " + str(m_id)
+		# TODO: Improve
 		info = self.db.get_movie_info(m_id)
 		t_feature = self.db.s2a(info[5])
 		g_feature = self.parser.genre2vec(info[2])
 		
+		
 		t_matrix = self.tag_learner.predict_proba([t_feature])
 		g_matrix = self.genre_learner.predict_proba([g_feature])
+	
+		one_index = -1
+		for i in range(0, 2):
+			if (self.tag_learner.classes_[i] == 1.0):
+				one_index = i
+		if (one_index == -1):
+			self.processError(2)
 
-		print t_matrix
-		print g_matrix
+		tag_score = t_matrix[0][one_index]
+		genre_score = g_matrix[0][one_index]
 
-		return 0
+		overall_score = 0.9 * tag_score + 0.1 * genre_score
+
+		return overall_score
 	
 	def sort(self):
 		for m in self.movies:
 			s = self.score(m)
 			self.movie_score.append((m, s))
-		self.movie_score.sort(key = lambda x : x[1])
+		self.movie_score.sort(key = lambda x : x[1], reverse=True)
 	
 	def onlyOneClass(self):
 		group = self.genre_model.split(":")

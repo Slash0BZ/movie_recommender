@@ -7,9 +7,11 @@ def testLearn(i):
 
 def testPredict(i):
 	predictor = corelib.Predictor(i)
-	arr = [1, 2, 3, 104]
+	#arr = [151, 253, 260, 293, 296, 318, 1370]
+	arr = [62, 70, 266, 480, 891]
 	predictor.getMovies(arr)
-	predictor.getRecommendations(2)
+	result = predictor.getRecommendations(2)
+	print result
 
-testLearn(6)
-testPredict(6)
+testLearn(12)
+testPredict(12)
