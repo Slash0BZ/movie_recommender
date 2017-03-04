@@ -42,8 +42,13 @@ class Learner:
 			self.ratings.append(h[2])
 
 		for m in self.movies:
+			# TODO: Figure out how to do with empty tag
 			info = self.db.get_movie_info(m)
 			t = self.db.s2a(info[5])
+			if  (len(t) != 1128):
+				t = list()
+				for i in range(0, 1128):
+					t.append(0.0)
 			g = self.parser.genre2vec(info[2])
 			self.genre_features.append(g)
 			self.tag_features.append(t)
@@ -80,6 +85,9 @@ class Learner:
 		self.genre_learner.fit(self.genre_features, self.classes)				
 	
 	def train_tag(self):
+		assert(len(self.tag_features) == len(self.classes))
+		for t in self.tag_features:
+			assert(len(self.tag_features) == 1128)
 		self.tag_learner.fit(self.tag_features, self.classes)
 	
 	def onlyOneClass(self):
