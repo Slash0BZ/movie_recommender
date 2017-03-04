@@ -279,7 +279,6 @@ class Tag2BinaryLearner:
 		print "Getting total " + str((len(ml))) + " vectors"
 		for m in ml:
 			count = count + 1
-			print count
 			self.TagList.append(parser.get_movie_tag_vector_fast(int(m)))
 		
 		for i in range (0, len(self.TagList)):
@@ -304,9 +303,7 @@ class Tag2BinaryLearner:
 	def train(self):
 		assert(len(self.Train_TagList) == len(self.Train_ClassList))
 		f = np.array(self.Train_TagList).astype('float32')		
-		print self.Train_ClassList
 		t = np.array(self.Train_ClassList).astype('float32')
-		print f.dtype
 		self.learner.fit(f, t)
 
 	def test(self):
