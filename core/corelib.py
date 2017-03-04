@@ -50,6 +50,7 @@ class Learner:
 	def genClasses(self):
 		# TODO: solve the case that only one class is seen
 		# This causes learner to raise an error
+		# Temp solution: check condition in training and saving
 		for r in self.ratings:
 			if (float(r) > 3):
 				self.classes.append(1.0)
@@ -81,25 +82,78 @@ class Learner:
 		self.tag_learner.fit(self.tag_features, self.classes)
 
 	def train(self):
+		if (self.onlyOneClass()):
+			return
 		self.train_genre()
 		self.train_tag()
 	
 	def save_model(self):
 		genre_model = pickle.dumps(self.genre_learner)
 		tag_model = pickle.dumps(self.tag_learner)
+		if (self.onlyOneClass()):
+			genre_model = "[ONECLASS]:" + str(self.classes[0])
+			tag_model = genre_model
 		
 
-
-			
-			
-		
 
 # Predictor is in charge of retriving models and predict on movies based on models
 class Predictor:
 	u_id = 0
 	db = object()
+	genre_model = ''
+	tag_model = ''
+	genre_learner = object()
+	tag_learner = object()
+	movies = list()
+	movie_score = list()
+
 	def __init__(self, _u_id):
 		self.u_id = _u_id
 		db = database_util.database()
+		self.getModels()
+		self.loadModels()
+		self.getMovies()
+		self.sort()
+	
+	def getModels(self):
+		# TODO
+		return 
+	
+	def loadModels(self):
+		# TODO
+		return 
+	
+	def getMovies(self, _movies):
+		if (len(_movies) == 0):
+			self.processError(0)
+		self.movies = _movies
+
+	def processError(self, error_code):
+		if (error_code == 0):
+			print "[ERROR]: Candidate movie list is empty"
+	
+	# return a score of a movie
+	def score(self, m_id):
+		# TODO
+		return 0
+	
+	def sort(self):
+		for m in self,movies:
+			s = score(m)
+			self.movie_score.append((m, s))
+		self.movie_score = movie_score.sort(key = lambda x : x[1])
+	
+	def getRecommendations(self, num):
+		ret = list()
+		if (num > len(self.movies)):
+			num = len(self.movies)
+		for i in range(0, num):
+			(mid, score) = self.movie_score[i]
+			ret.append(mid)
+		return ret
+			
+		
+		
+		
 
 		
