@@ -112,6 +112,9 @@ class Parser:
 		ret = list()
 		for (t,s) in tags:
 			ret.append(s)
+		if (len(tags) == 0):
+			for i in range (0, 25):
+				ret.append(i)
 		return ret
 
 	def get_movie_tag_vector(self, m_id):
@@ -259,8 +262,8 @@ class Tag2BinaryLearner:
 	Train_ClassList = []
 	Test_TagList = []
 	Test_ClassList = []
-	learner = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
-
+	#learner = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+	learner = svm.SVC()
 	def __init__(self, u_id):
 		self.u_id = u_id
 		self.fillParameters()
@@ -275,9 +278,8 @@ class Tag2BinaryLearner:
 		print "Getting total " + str((len(ml))) + " vectors"
 		for m in ml:
 			count = count + 1
-			print count
-			self.TagList.append(parser.get_movie_tag_vector(int(m)))
-			print parser.get_movie_tag_vector(int(m));
+			#print count
+			self.TagList.append(parser.get_movie_tag_vector_fast(int(m)))
 
 		d_rl = [float(i) for i in rl]
 		averageRating = sum(d_rl) / len(d_rl)
@@ -332,7 +334,8 @@ class Combined2BinaryLearner:
 	Train_ClassList = []
 	Test_FeatureList = []
 	Test_ClassList = []
-	learner = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+	#learner = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+	learner = svm.SVC()
 
 	def __init__(self, u_id):
 		self.u_id = u_id
@@ -347,7 +350,8 @@ class Combined2BinaryLearner:
 		count = 0
 		for m in ml:
 			count = count + 1
-			featureVec = parser.get_movie_tag_vector(int(m)) + parser.get_movie_genre_vector(int(m))
+			featureVec = parser.get_movie_tag_vector_fast(int(m)) + parser.get_movie_genre_vector(int(m))
+			assert(len(featureVec) == 1148)
 			self.FeatureList.append(featureVec)
 
 		d_rl = [float(i) for i in rl]
