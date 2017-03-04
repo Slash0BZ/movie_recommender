@@ -6,6 +6,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import cross_val_score
 import pickle
+import base64
 sys.path.insert(0, '../database')
 sys.path.insert(1, '../train')
 import database_util
@@ -80,6 +81,13 @@ class Learner:
 	
 	def train_tag(self):
 		self.tag_learner.fit(self.tag_features, self.classes)
+	
+	def onlyOneClass(self):
+		classTag = self.classes[0]
+		for i in range (1, len(self.classes)):
+			if (self.classes[i] != classTag):
+				return False
+		return True
 
 	def train(self):
 		if (self.onlyOneClass()):
@@ -93,6 +101,10 @@ class Learner:
 		if (self.onlyOneClass()):
 			genre_model = "[ONECLASS]:" + str(self.classes[0])
 			tag_model = genre_model
+
+		#genre_model = base64.b64encode(genre_model)
+		#tag_model = base64.b64encode(tag_model)
+		self.db.add_user_model(self.u_id, genre_model, tag_model)
 		
 
 
@@ -100,6 +112,7 @@ class Learner:
 class Predictor:
 	u_id = 0
 	db = object()
+	parser = object()
 	genre_model = ''
 	tag_model = ''
 	genre_learner = object()
@@ -109,19 +122,25 @@ class Predictor:
 
 	def __init__(self, _u_id):
 		self.u_id = _u_id
-		db = database_util.database()
+		self.db = database_util.database()
+		self.parser = mrlib.Parser()
 		self.getModels()
-		self.loadModels()
-		self.getMovies()
-		self.sort()
+		if (self.onlyOneClass() == False):
+			self.loadModels()
 	
 	def getModels(self):
-		# TODO
-		return 
+		fromDB = self.db.get_user_model(self.u_id)
+		g_model_64 = fromDB[0][1]
+		t_model_64 = fromDB[0][2]
+		assert(g_model_64 != t_model_64)
+		#self.genre_model = base64.b64decode(g_model_64)
+		#self.tag_model = base64.b64decode(t_model_64)
+		self.genre_model = g_model_64
+		self.tag_model = t_model_64
 	
 	def loadModels(self):
-		# TODO
-		return 
+		self.genre_learner = pickle.loads(self.genre_model)
+		self.tag_learner = pickle.loads(self.tag_model)
 	
 	def getMovies(self, _movies):
 		if (len(_movies) == 0):
@@ -131,20 +150,44 @@ class Predictor:
 	def processError(self, error_code):
 		if (error_code == 0):
 			print "[ERROR]: Candidate movie list is empty"
+		if (error_code == 1):
+			print "[ERROR]: Only one class has been speicified by user"
 	
 	# return a score of a movie
 	def score(self, m_id):
-		# TODO
+		# TODO: gives the same score now
+		# Might be buggy
+		print "Scoring: " + str(m_id)
+		info = self.db.get_movie_info(m_id)
+		t_feature = self.db.s2a(info[5])
+		g_feature = self.parser.genre2vec(info[2])
+		
+		t_matrix = self.tag_learner.predict_proba([t_feature])
+		g_matrix = self.genre_learner.predict_proba([g_feature])
+
+		print t_matrix
+		print g_matrix
+
 		return 0
 	
 	def sort(self):
-		for m in self,movies:
-			s = score(m)
+		for m in self.movies:
+			s = self.score(m)
 			self.movie_score.append((m, s))
-		self.movie_score = movie_score.sort(key = lambda x : x[1])
+		self.movie_score.sort(key = lambda x : x[1])
+	
+	def onlyOneClass(self):
+		group = self.genre_model.split(":")
+		if (group[0] == "[ONECLASS]"):
+			return True
+		return False
 	
 	def getRecommendations(self, num):
+		if (self.onlyOneClass()):
+			self.processError(1)
+			return
 		ret = list()
+		self.sort()
 		if (num > len(self.movies)):
 			num = len(self.movies)
 		for i in range(0, num):

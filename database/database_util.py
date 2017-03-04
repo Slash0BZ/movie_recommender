@@ -115,14 +115,6 @@ class database:
 		row = self.cursor.fetchone()
 		return row
 
-	# Add info to the specifies rows in the specifies column with value	
-	#def add_movie_additional(self, m_id, column_name, value):
-
-
-
-
-
-
 	# Add user history into user_history table
 	# Write log after the operation finishes
 	def add_user_history(self, u_id, m_id, rating, timestamp):
@@ -139,4 +131,19 @@ class database:
 	#get user history from user_history table
 	def get_user_history(self, u_id):
 		self.cursor.execute("SELECT * FROM user_history WHERE u_id=?", u_id)
+		return self.cursor.fetchall()
+	
+	def add_user_model(self, u_id, g_model, t_model):
+		self.cursor.execute("SELECT * FROM user_model WHERE u_id=?", u_id)
+		if (len(self.cursor.fetchall()) == 0):
+			self.cursor.execute("INSERT INTO user_model (u_id, genre_model, tag_model) VALUES (?,?,?)", u_id, g_model, t_model)
+			self.cnxn.commit()
+			self.write_log("INSERT INTO user_model")
+		else:
+			self.cursor.execute("UPDATE user_model SET genre_model=?,tag_model=? WHERE u_id=?", g_model, t_model, u_id)
+			self.cnxn.commit()
+			self.write_log("UPDATE user_model")
+	
+	def get_user_model(self, u_id):
+		self.cursor.execute("SELECT * FROM user_model WHERE u_id=?", u_id)
 		return self.cursor.fetchall()
