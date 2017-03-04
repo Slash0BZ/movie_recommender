@@ -108,13 +108,14 @@ class Parser:
 	def tag2vec(self, tags):
 		if (len(tags) != 1128):
 			print "Invalid tag file"
-			return list()
 		ret = list()
 		for (t,s) in tags:
 			ret.append(s)
 		if (len(tags) == 0):
-			for i in range (0, 25):
-				ret.append(i)
+			for i in range (0, 1128):
+				ret.append(0.0)
+		if (len(ret) != 1128):
+			print "Cast to valid vector failed"
 		return ret
 
 	def get_movie_tag_vector(self, m_id):
@@ -278,8 +279,11 @@ class Tag2BinaryLearner:
 		print "Getting total " + str((len(ml))) + " vectors"
 		for m in ml:
 			count = count + 1
-			#print count
+			print count
 			self.TagList.append(parser.get_movie_tag_vector_fast(int(m)))
+		
+		for i in range (0, len(self.TagList)):
+			assert(len(self.TagList[i]) == 1128)
 
 		d_rl = [float(i) for i in rl]
 		averageRating = sum(d_rl) / len(d_rl)
@@ -300,7 +304,8 @@ class Tag2BinaryLearner:
 	def train(self):
 		assert(len(self.Train_TagList) == len(self.Train_ClassList))
 		f = np.array(self.Train_TagList).astype('float32')		
-		t = np.array(self.Train_ClassList).astype('float32')		
+		print self.Train_ClassList
+		t = np.array(self.Train_ClassList).astype('float32')
 		print f.dtype
 		self.learner.fit(f, t)
 
