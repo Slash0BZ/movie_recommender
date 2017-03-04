@@ -20,4 +20,12 @@ def tester():
 	for i in range(1, 50):
 		initTest(i)
 
-tester()
+def importRatings(uid):
+	db = database_util.database()
+	parser = mrlib.Parser()
+	(movies, ratings) = parser.get_user_history(uid)
+	num = len(movies) * 0.9
+	for i in range (0, int(num)):
+		db.add_user_history(uid + 10, movies[i], ratings[i], 0)
+
+importRatings(2)
