@@ -8,7 +8,7 @@ import os.path
 from enum import Enum
 class database:
 		
-	
+	log_path = '../log/'
 
 	server = secret.get_server_key()
 	database = secret.get_database_key()
@@ -26,7 +26,7 @@ class database:
 		self.username = _username
 		self.password = _password
 		self.connect()
-		self.log_path = '../log/'
+		
 	
 	# Get callde everytime a database object is collected
 	def __del__(self):
