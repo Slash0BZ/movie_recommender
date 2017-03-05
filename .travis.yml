@@ -2,5 +2,7 @@ language: python
 python:
  - "2.7"
 install: 
+ - sudo apt-get install unixodbc-dev
+ - sudo apt-get install msodbcsql mssql-tools
  - pip install -r requirements.txt
 script: python tests/test.py
