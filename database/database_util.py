@@ -4,10 +4,11 @@
 import pyodbc
 import secret
 import datetime
-
+import os.path
+from enum import Enum
 class database:
+		
 	
-	log_file = '../log/database.log'
 
 	server = secret.get_server_key()
 	database = secret.get_database_key()
@@ -25,6 +26,7 @@ class database:
 		self.username = _username
 		self.password = _password
 		self.connect()
+		self.log_path = '../log/'
 	
 	# Get callde everytime a database object is collected
 	def __del__(self):
@@ -47,10 +49,11 @@ class database:
 		self.cursor.close()
 
 	# Write a msg with time to the end of the log_file
-	def write_log(self, msg):
+	def write_log(self, msg, log_file_name):
+		log_file = self.log_path + log_file_name + ".log"
 		time_string = str(datetime.datetime.now())
-		prepared_string = "[%s]: %s" % (time_string, msg)
-		f = open(self.log_file, 'a')
+		prepared_string = "[%s]: %s \n" % (time_string, msg)
+		f = open(log_file, 'a')
 		f.write(prepared_string)
 		f.close()
 
@@ -71,7 +74,7 @@ class database:
 			return
 		self.cursor.execute("INSERT INTO movie_info (id,name,genre,year) VALUES (?,?,?,?)",m_id, name, genre, year)
 		self.cnxn.commit()
-		self.write_log("INSERT movie_info %s %s %s" % (name, genre, year))
+		self.write_log("INSERT movie_info %s %s %s" % (name, genre, year), 'movie_info')
 	
 	def get_all_movie_id(self):
 		self.cursor.execute("SELECT id FROM movie_info")
@@ -131,11 +134,11 @@ class database:
 			#user with u_id not exist in db
 			self.cursor.execute("INSERT INTO user_history (u_id,m_id,rating,timestamp) VALUES (?,?,?,?)",u_id, m_id, rating, timestamp)
 			self.cnxn.commit()
-			self.write_log("INSERT user_history %s %s %s %s" % (u_id, m_id, rating, timestamp))
+			self.write_log("INSERT user_history %s %s %s %s" % (u_id, m_id, rating, timestamp), 'user_history')
 		else:
 			self.cursor.execute("UPDATE user_history SET rating=?,timestamp=? WHERE u_id=? AND m_id=?", rating, timestamp, u_id, m_id)
 			self.cnxn.commit()
-			self.write_log("UPDATE user_history %s %s %s %s" % (u_id, m_id, rating, timestamp))
+			self.write_log("UPDATE user_history %s %s %s %s" % (u_id, m_id, rating, timestamp), 'user_history')
 		
 	#get user history from user_history table
 	def get_user_history(self, u_id):
@@ -160,7 +163,7 @@ class database:
 			#user with u_id not exist in db
 			self.cursor.execute("INSERT INTO user_model(u_id,genre_model,tag_model) VALUES (?,?,?)",u_id, genre_model, tag_model)
 			self.cnxn.commit()
-			self.write_log("INSERT user_model %s %s %s" % (u_id, genre_model, tag_model))
+			self.write_log("INSERT user_model %s %s %s" % (u_id, genre_model, tag_model), 'user_model')
 		else:
 			#check input param
 			if (genre_model==None) & (tag_model==None):
@@ -172,4 +175,4 @@ class database:
 
 			self.cursor.execute("UPDATE user_model SET genre_model=?,tag_model=? WHERE u_id=?", genre_model, tag_model, u_id)
 			self.cnxn.commit()
-			self.write_log("UPDATE user_model %s %s %s" % (u_id, genre_model, tag_model))
+			self.write_log("UPDATE user_model %s %s %s" % (u_id, genre_model, tag_model), 'user_model')
