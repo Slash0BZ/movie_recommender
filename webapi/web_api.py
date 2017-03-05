@@ -1,10 +1,11 @@
 
 from flask import Flask, jsonify, request, abort
+
 import sys
-sys.path.insert(0, "../database")
-import database_util
-import time
-import math
+sys.path.append("../")
+from database import database_util
+from core import corelib
+
 
 app = Flask(__name__)
 
@@ -26,15 +27,25 @@ def update_history():
     db = database_util.database()
     db.add_user_history(user_id, movie_imdb_id, user_rating, timestamp)
 
+    #retrain the model
+    learner = corelib.Learner(user_id)
+    learner.train()
+    laerner.save_model()
+    return 201
+
 @app.route('/mrelearner/api/v1.0/recommender',methods=['POST'])
 def get_recommendation():
     if not request.json: 
         abort(400)
     user_id = request.json["user_id"]
     candidate_list = request.json["candidate_list"]
+    predictor = corelib.Predictor(user_id)
+    predictor.getMovies(candidate_list)
+    result = predictor.getRecommendations(5)
+    return jsonify({"result": result}), 200
     #return predict(user_id, condidate_list)
 
     
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
 
