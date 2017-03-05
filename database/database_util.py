@@ -118,14 +118,6 @@ class database:
 		row = self.cursor.fetchone()
 		return row
 
-	# Add info to the specifies rows in the specifies column with value	
-	#def add_movie_additional(self, m_id, column_name, value):
-
-
-
-#table user_histroy
-
-
 	# Add user history into user_history table
 	# Write log after the operation finishes
 	def add_user_history(self, u_id, m_id, rating, timestamp):
@@ -150,8 +142,7 @@ class database:
 
 	#update user genre model and/or tag model
 	def update_user_model(self, u_id, genre_model=None, tag_model=None):
-		self.cursor.execute("SELECT * FROM user_model WHERE u_id=?", u_id)
-		data = self.cursor.fetchall()
+		data = self.get_user_model(u_id)
 
 		if len(data) == 0:
 			#TODO set default value
@@ -176,3 +167,19 @@ class database:
 			self.cursor.execute("UPDATE user_model SET genre_model=?,tag_model=? WHERE u_id=?", genre_model, tag_model, u_id)
 			self.cnxn.commit()
 			self.write_log("UPDATE user_model %s %s %s" % (u_id, genre_model, tag_model), 'user_model')
+	
+	def add_user_model(self, u_id, g_model, t_model, average):
+		self.cursor.execute("SELECT * FROM user_model WHERE u_id=?", u_id)
+		if (len(self.cursor.fetchall()) == 0):
+			self.cursor.execute("INSERT INTO user_model (u_id, genre_model, tag_model, average) VALUES (?,?,?,?)", u_id, g_model, t_model, average)
+			self.cnxn.commit()
+			self.write_log("INSERT INTO user_model")
+		else:
+			self.cursor.execute("UPDATE user_model SET genre_model=?,tag_model=?,average=? WHERE u_id=?", g_model, t_model, average, u_id)
+			self.cnxn.commit()
+			self.write_log("UPDATE user_model")
+	
+	def get_user_model(self, u_id):
+		self.cursor.execute("SELECT * FROM user_model WHERE u_id=?", u_id)
+		return self.cursor.fetchall()
+

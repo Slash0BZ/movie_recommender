@@ -108,10 +108,14 @@ class Parser:
 	def tag2vec(self, tags):
 		if (len(tags) != 1128):
 			print "Invalid tag file"
-			return list()
 		ret = list()
 		for (t,s) in tags:
 			ret.append(s)
+		if (len(tags) == 0):
+			for i in range (0, 1128):
+				ret.append(0.0)
+		if (len(ret) != 1128):
+			print "Cast to valid vector failed"
 		return ret
 
 	def get_movie_tag_vector(self, m_id):
@@ -259,8 +263,8 @@ class Tag2BinaryLearner:
 	Train_ClassList = []
 	Test_TagList = []
 	Test_ClassList = []
-	learner = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
-
+	#learner = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+	learner = svm.SVC()
 	def __init__(self, u_id):
 		self.u_id = u_id
 		self.fillParameters()
@@ -275,9 +279,10 @@ class Tag2BinaryLearner:
 		print "Getting total " + str((len(ml))) + " vectors"
 		for m in ml:
 			count = count + 1
-			print count
-			self.TagList.append(parser.get_movie_tag_vector(int(m)))
-			print parser.get_movie_tag_vector(int(m));
+			self.TagList.append(parser.get_movie_tag_vector_fast(int(m)))
+		
+		for i in range (0, len(self.TagList)):
+			assert(len(self.TagList[i]) == 1128)
 
 		d_rl = [float(i) for i in rl]
 		averageRating = sum(d_rl) / len(d_rl)
@@ -298,8 +303,7 @@ class Tag2BinaryLearner:
 	def train(self):
 		assert(len(self.Train_TagList) == len(self.Train_ClassList))
 		f = np.array(self.Train_TagList).astype('float32')		
-		t = np.array(self.Train_ClassList).astype('float32')		
-		print f.dtype
+		t = np.array(self.Train_ClassList).astype('float32')
 		self.learner.fit(f, t)
 
 	def test(self):
@@ -332,7 +336,8 @@ class Combined2BinaryLearner:
 	Train_ClassList = []
 	Test_FeatureList = []
 	Test_ClassList = []
-	learner = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+	#learner = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+	learner = svm.SVC()
 
 	def __init__(self, u_id):
 		self.u_id = u_id
@@ -347,7 +352,8 @@ class Combined2BinaryLearner:
 		count = 0
 		for m in ml:
 			count = count + 1
-			featureVec = parser.get_movie_tag_vector(int(m)) + parser.get_movie_genre_vector(int(m))
+			featureVec = parser.get_movie_tag_vector_fast(int(m)) + parser.get_movie_genre_vector(int(m))
+			assert(len(featureVec) == 1148)
 			self.FeatureList.append(featureVec)
 
 		d_rl = [float(i) for i in rl]
