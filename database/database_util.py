@@ -120,7 +120,7 @@ class database:
 
 
 
-
+#table user_histroy
 
 
 	# Add user history into user_history table
@@ -128,6 +128,7 @@ class database:
 	def add_user_history(self, u_id, m_id, rating, timestamp):
 		self.cursor.execute("SELECT * FROM user_history WHERE u_id=? AND m_id=?", u_id, m_id)
 		if len(self.cursor.fetchall()) == 0:
+			#user with u_id not exist in db
 			self.cursor.execute("INSERT INTO user_history (u_id,m_id,rating,timestamp) VALUES (?,?,?,?)",u_id, m_id, rating, timestamp)
 			self.cnxn.commit()
 			self.write_log("INSERT user_history %s %s %s %s" % (u_id, m_id, rating, timestamp))
@@ -140,3 +141,35 @@ class database:
 	def get_user_history(self, u_id):
 		self.cursor.execute("SELECT * FROM user_history WHERE u_id=?", u_id)
 		return self.cursor.fetchall()
+
+
+#table user_model
+
+	#update user genre model and/or tag model
+	def update_user_model(self, u_id, genre_model=None, tag_model=None):
+		self.cursor.execute("SELECT * FROM user_model WHERE u_id=?", u_id)
+		data = self.cursor.fetchall()
+
+		if len(data) == 0:
+			#TODO set default value
+			if genre_model==None:
+				genre_model = 'None'
+			if tag_model==None:
+				tag_model= 'None'
+
+			#user with u_id not exist in db
+			self.cursor.execute("INSERT INTO user_model(u_id,genre_model,tag_model) VALUES (?,?,?)",u_id, genre_model, tag_model)
+			self.cnxn.commit()
+			self.write_log("INSERT user_model %s %s %s" % (u_id, genre_model, tag_model))
+		else:
+			#check input param
+			if (genre_model==None) & (tag_model==None):
+				return
+			if genre_model==None:
+				genre_model = data[1]
+			if tag_model==None:
+				tag_model = data[2]
+
+			self.cursor.execute("UPDATE user_model SET genre_model=?,tag_model=? WHERE u_id=?", genre_model, tag_model, u_id)
+			self.cnxn.commit()
+			self.write_log("UPDATE user_model %s %s %s" % (u_id, genre_model, tag_model))
