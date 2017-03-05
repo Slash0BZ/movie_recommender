@@ -1,13 +1,21 @@
 language: python
+
 python:
  - "2.7"
+
+services:
+ - docker
+
+before_install:
+ - docker pull ubuntu:16.04
+ - docker run -it ubuntu bash
+
 install: 
- - sudo su
- - curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
- - curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql.list
- - exit
+ - su -c "curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -"
+ - su -c "curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql.list"
  - sudo apt-get update
  - sudo apt-get install unixodbc-dev
  - sudo apt-get install msodbcsql mssql-tools
  - pip install -r requirements.txt
+
 script: python tests/test.py
