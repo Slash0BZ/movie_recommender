@@ -159,13 +159,14 @@ class Predictor:
 	tag_learner = object()
 	movies = list()
 	movie_score = list()
+	invalid_user = False
 
 	def __init__(self, _u_id):
 		self.u_id = _u_id
 		self.db = database_util.database()
 		self.parser = mrlib.Parser()
 		self.getModels()
-		if (self.onlyOneClass() == False):
+		if (self.onlyOneClass() == False and self.invalid_user == False):
 			self.loadModels()
 
 	# Write a msg with time to the end of the log_file
@@ -179,6 +180,9 @@ class Predictor:
 	
 	def getModels(self):
 		fromDB = self.db.get_user_model(self.u_id)
+		if (len(fromDB) == 0):
+			self.processError(3)
+			return
 		g_model_64 = fromDB[0][1]
 		t_model_64 = fromDB[0][2]
 		assert(g_model_64 != t_model_64)
@@ -203,6 +207,9 @@ class Predictor:
 			print("[ERROR]: Only one class has been speicified by user")
 		if (error_code == 2):
 			print("[ERROR]: Failed to find class 1.0 in learner")
+		if (error_code == 3):
+			print("[ERROR]: No model exists")
+			self.invalid_user = True
 		else:
 			print("[ERROR]: Unknown error")
 	
@@ -248,6 +255,8 @@ class Predictor:
 		if (self.onlyOneClass()):
 			self.processError(1)
 			return
+		if (self.invalid_user):
+			return list()
 		ret = list()
 		self.sort()
 		if (num > len(self.movies)):
