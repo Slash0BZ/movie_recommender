@@ -50,7 +50,7 @@ class Parser:
 				break
 		fp.close()
 		if (len(ret_movie) != len(ret_rating)):
-			print "[Error]: movie does not correspond a rating"
+			print("[Error]: movie does not correspond a rating")
 			return (list(), list())
 		else:
 			return (ret_movie, ret_rating)
@@ -107,7 +107,7 @@ class Parser:
 
 	def tag2vec(self, tags):
 		if (len(tags) != 1128):
-			print "Invalid tag file"
+			print("Invalid tag file")
 		ret = list()
 		for (t,s) in tags:
 			ret.append(s)
@@ -115,7 +115,7 @@ class Parser:
 			for i in range (0, 1128):
 				ret.append(0.0)
 		if (len(ret) != 1128):
-			print "Cast to valid vector failed"
+			print("Cast to valid vector failed")
 		return ret
 
 	def get_movie_tag_vector(self, m_id):
@@ -246,11 +246,11 @@ class Genre2BinaryLearner:
 			if (output[i] == self.Test_ClassList[i]):
 				correct = correct + 1.0
 
-		print "Test on uid " + str(self.u_id)
-		print "correctness: " + str(correct / total)
+		print("Test on uid " + str(self.u_id))
+		print("correctness: " + str(correct / total))
 	
 	def crossValidation(self):
-		print cross_val_score(self.learner, self.GenreList, self.ClassList, scoring='accuracy')
+		print(cross_val_score(self.learner, self.GenreList, self.ClassList, scoring='accuracy'))
 			
 
 	
@@ -269,14 +269,14 @@ class Tag2BinaryLearner:
 		self.u_id = u_id
 		self.fillParameters()
 		self.splitTrainTest()
-		print "Init Completion"
+		print("Init Completion")
 	
 	def fillParameters(self):
 		parser = Parser()
 		(ml, rl) = parser.get_user_history(self.u_id)
 
 		count = 0
-		print "Getting total " + str((len(ml))) + " vectors"
+		print("Getting total " + str((len(ml))) + " vectors")
 		for m in ml:
 			count = count + 1
 			self.TagList.append(parser.get_movie_tag_vector_fast(int(m)))
@@ -315,17 +315,17 @@ class Tag2BinaryLearner:
 			if (output[i] == self.Test_ClassList[i]):
 				correct = correct + 1.0
 
-		print "Test on uid " + str(self.u_id)
-		print "correctness: " + str(correct / total)
+		print("Test on uid " + str(self.u_id))
+		print("correctness: " + str(correct / total))
 	
 	def scoreSet(self):
 		f = np.array(self.Test_TagList).astype('float32')		
-		print self.learner.classes_
-		print self.learner.predict_proba(f)
-		print self.Test_ClassList
+		print(self.learner.classes_)
+		print(self.learner.predict_proba(f))
+		print(self.Test_ClassList)
 
 	def crossValidation(self):
-		print cross_val_score(self.learner, self.TagList, self.ClassList, scoring='accuracy')
+		print(cross_val_score(self.learner, self.TagList, self.ClassList, scoring='accuracy'))
 
 class Combined2BinaryLearner:
 	
@@ -343,7 +343,7 @@ class Combined2BinaryLearner:
 		self.u_id = u_id
 		self.fillParameters()
 		self.splitTrainTest()
-		print "Init Completion"
+		print("Init Completion")
 	
 	def fillParameters(self):
 		parser = Parser()
@@ -376,7 +376,7 @@ class Combined2BinaryLearner:
 		assert(len(self.Train_FeatureList) == len(self.Train_ClassList))
 		f = np.array(self.Train_FeatureList).astype('float32')		
 		t = np.array(self.Train_ClassList).astype('float32')		
-		print f.dtype
+		print(f.dtype)
 		self.learner.fit(f, t)
 
 	def test(self):
@@ -388,17 +388,17 @@ class Combined2BinaryLearner:
 			if (output[i] == self.Test_ClassList[i]):
 				correct = correct + 1.0
 
-		print "Test on uid " + str(self.u_id)
-		print "correctness: " + str(correct / total)
+		print("Test on uid " + str(self.u_id))
+		print("correctness: " + str(correct / total))
 	
 	def scoreSet(self):
 		f = np.array(self.Test_FeatureList).astype('float32')		
-		print self.learner.classes_
-		print self.learner.predict_proba(f)
-		print self.Test_ClassList
+		print(self.learner.classes_)
+		print(self.learner.predict_proba(f))
+		print(self.Test_ClassList)
 
 	def crossValidation(self):
-		print cross_val_score(self.learner, self.FeatureList, self.ClassList, scoring='accuracy')
+		print(cross_val_score(self.learner, self.FeatureList, self.ClassList, scoring='accuracy'))
 
 
 

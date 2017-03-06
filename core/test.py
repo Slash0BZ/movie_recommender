@@ -11,7 +11,7 @@ def testPredict(i):
 	arr = [62, 70, 266, 480, 891]
 	predictor.getMovies(arr)
 	result = predictor.getRecommendations(2)
-	print result
+	print(result)
 
 testLearn(12)
 testPredict(12)
