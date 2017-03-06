@@ -11,9 +11,13 @@ sys.path.insert(0, '../database')
 sys.path.insert(1, '../train')
 import database_util
 import mrlib
+import datetime
 
 # Learner is in charge of building models and saving models to database
 class Learner:
+
+	log_path = '../log/'
+
 	u_id = 0
 	db = object()
 	parser = object()
@@ -34,6 +38,16 @@ class Learner:
 		if (self.validateFeature() == False):
 			self.processError(0)
 		self.genClasses()
+
+
+	# Write a msg with time to the end of the log_file
+	def write_log(self, msg, log_file_name):
+		log_file = self.log_path + log_file_name + ".log"
+		time_string = str(datetime.datetime.now())
+		prepared_string = "[%s]: %s \n" % (time_string, msg)
+		f = open(log_file, 'a+')
+		f.write(prepared_string)
+		f.close()
 
 	def getFeatures(self):
 		history = self.db.get_user_history(self.u_id)
@@ -86,12 +100,12 @@ class Learner:
 	def processError(self, error_code):
 		# 0: Feature is not valid
 		if (error_code == 0):
-			print "[ERROR]: Feature set is not valid"
+			print("[ERROR]: Feature set is not valid")
 		# 1: history length is too short
 		if (error_code == 1):
-			print "[ERROR]: Insufficient history"
+			print("[ERROR]: Insufficient history")
 		else:
-			print "[ERROR]: Unknown error"
+			print("[ERROR]: Unknown error")
 	
 	def train_genre(self):
 		self.genre_learner.fit(self.genre_features, self.classes)				
@@ -113,7 +127,9 @@ class Learner:
 		if (self.onlyOneClass()):
 			return
 		self.train_genre()
+		self.write_log("user %s genre_model updated" % (self.u_id), "learner")
 		self.train_tag()
+		self.write_log("user %s tag_model updated" % (self.u_id), "learner")
 	
 	def save_model(self):
 		genre_model = pickle.dumps(self.genre_learner)
@@ -121,15 +137,19 @@ class Learner:
 		if (self.onlyOneClass()):
 			genre_model = "[ONECLASS]:" + str(self.classes[0])
 			tag_model = genre_model
-
+			
 		#genre_model = base64.b64encode(genre_model)
 		#tag_model = base64.b64encode(tag_model)
 		self.db.add_user_model(self.u_id, genre_model, tag_model, self.average_rating)
+		self.write_log("user %s model saved" % (self.u_id), "learner")
 		
 
 
 # Predictor is in charge of retriving models and predict on movies based on models
 class Predictor:
+
+	log_path = '../log/'
+
 	u_id = 0
 	db = object()
 	parser = object()
@@ -139,17 +159,30 @@ class Predictor:
 	tag_learner = object()
 	movies = list()
 	movie_score = list()
+	invalid_user = False
 
 	def __init__(self, _u_id):
 		self.u_id = _u_id
 		self.db = database_util.database()
 		self.parser = mrlib.Parser()
 		self.getModels()
-		if (self.onlyOneClass() == False):
+		if (self.onlyOneClass() == False and self.invalid_user == False):
 			self.loadModels()
+
+	# Write a msg with time to the end of the log_file
+	def write_log(self, msg, log_file_name):
+		log_file = self.log_path + log_file_name + ".log"
+		time_string = str(datetime.datetime.now())
+		prepared_string = "[%s]: %s \n" % (time_string, msg)
+		f = open(log_file, 'a+')
+		f.write(prepared_string)
+		f.close()
 	
 	def getModels(self):
 		fromDB = self.db.get_user_model(self.u_id)
+		if (len(fromDB) == 0):
+			self.processError(3)
+			return
 		g_model_64 = fromDB[0][1]
 		t_model_64 = fromDB[0][2]
 		assert(g_model_64 != t_model_64)
@@ -169,13 +202,16 @@ class Predictor:
 
 	def processError(self, error_code):
 		if (error_code == 0):
-			print "[ERROR]: Candidate movie list is empty"
+			print("[ERROR]: Candidate movie list is empty")
 		if (error_code == 1):
-			print "[ERROR]: Only one class has been speicified by user"
+			print("[ERROR]: Only one class has been speicified by user")
 		if (error_code == 2):
-			print "[ERROR]: Failed to find class 1.0 in learner"
+			print("[ERROR]: Failed to find class 1.0 in learner")
+		if (error_code == 3):
+			print("[ERROR]: No model exists")
+			self.invalid_user = True
 		else:
-			print "[ERROR]: Unknown error"
+			print("[ERROR]: Unknown error")
 	
 	# return a score of a movie
 	def score(self, m_id):
@@ -207,6 +243,7 @@ class Predictor:
 			s = self.score(m)
 			self.movie_score.append((m, s))
 		self.movie_score.sort(key = lambda x : x[1], reverse=True)
+		self.write_log("user %s movie_score %s" % (self.u_id, ' '.join(str(e) for e in self.movie_score)), "predictor")
 	
 	def onlyOneClass(self):
 		group = self.genre_model.split(":")
@@ -218,6 +255,8 @@ class Predictor:
 		if (self.onlyOneClass()):
 			self.processError(1)
 			return
+		if (self.invalid_user):
+			return list()
 		ret = list()
 		self.sort()
 		if (num > len(self.movies)):
@@ -225,6 +264,8 @@ class Predictor:
 		for i in range(0, num):
 			(mid, score) = self.movie_score[i]
 			ret.append(mid)
+
+		self.write_log("user %s num %s recommend %s" % (self.u_id, num, ' '.join(str(e) for e in ret)), "predictor")
 		return ret
 			
 		
