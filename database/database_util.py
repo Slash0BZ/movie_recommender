@@ -173,11 +173,9 @@ class database:
 		if (len(self.cursor.fetchall()) == 0):
 			self.cursor.execute("INSERT INTO user_model (u_id, genre_model, tag_model, average) VALUES (?,?,?,?)", u_id, g_model, t_model, average)
 			self.cnxn.commit()
-			self.write_log("INSERT INTO user_model")
 		else:
 			self.cursor.execute("UPDATE user_model SET genre_model=?,tag_model=?,average=? WHERE u_id=?", g_model, t_model, average, u_id)
 			self.cnxn.commit()
-			self.write_log("UPDATE user_model")
 	
 	def get_user_model(self, u_id):
 		self.cursor.execute("SELECT * FROM user_model WHERE u_id=?", u_id)
