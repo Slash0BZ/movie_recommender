@@ -28,10 +28,11 @@ def update_history():
     db.add_user_history(user_id, movie_imdb_id, user_rating, timestamp)
 
     #retrain the model
-    learner = corelib.Learner(user_id)
-    learner.train()
-    laerner.save_model()
-    return 201
+    #learner = corelib.Learner(user_id)
+    #learner.train()
+    #learner.save_model()
+    return "success", 201
+
 
 @app.route('/mrelearner/api/v1.0/recommender',methods=['POST'])
 def get_recommendation():
