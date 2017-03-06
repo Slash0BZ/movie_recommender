@@ -7,8 +7,9 @@ import database_util
 
 class Converter:
 	
+	db = object()
 	def __init__(self):
-		return
+		self.db = database_util.database()
 	
 	# imdbid: imdb id of movies, used by caller	
 	# mid: internal m_id of learner
@@ -59,10 +60,8 @@ class Converter:
 	# increment a internal u_id for the new called_id
 	# Should always returns a valid value
 	def callerid2uid(self, caller_id):
-		#TODO
-		return
+		return self.db.get_uid(caller_id)
 
 	# return -1 if u_id does not exists
 	def uid2callerid(self, u_id):
-		#TODO
-		return
+		return self.db.get_identifier(u_id)

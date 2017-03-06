@@ -180,4 +180,37 @@ class database:
 	def get_user_model(self, u_id):
 		self.cursor.execute("SELECT * FROM user_model WHERE u_id=?", u_id)
 		return self.cursor.fetchall()
+	
+# table user_info
+# u_id (int): the user id for learning db
+# identifier (int): the user id for api caller
+
+	# if the caller_id exists, return the u_id
+	# otherwise insert the caller_id with a new u_id
+	# TODO: add logger
+	def get_uid(self, caller_id):
+		self.cursor.execute("SELECT * FROM user_info WHERE identifier=?", caller_id)
+		result = self.cursor.fetchall()
+		if (len(result) == 0):
+			self.cursor.execute("SELECT MAX(u_id) AS max_u_id FROM user_info")
+			max_u_id = self.cursor.fetchall()[0][0]
+			if (max_u_id == None):
+				max_u_id = 0
+			new_u_id = max_u_id + 1
+			self.cursor.execute("INSERT INTO user_info (u_id, identifier) VALUES (?,?)", new_u_id, caller_id)
+			self.cnxn.commit()
+			return new_u_id
+		return result[0][0]
+	
+	# if u_id exists, return caller_id
+	# else return -1
+	# TODO: add logger
+	def get_identifier(self, u_id):
+		self.cursor.execute("SELECT * FROM user_info WHERE u_id=?", u_id)
+		result = self.cursor.fetchall()
+		if (len(result) == 0):
+			return -1
+		else:
+			return result[0][1]
+
 
