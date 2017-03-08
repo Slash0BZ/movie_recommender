@@ -1,11 +1,9 @@
 
-from flask import Flask, jsonify, request, abort
-from flask.ext.httpauth import HTTPBasicAuth
+from flask import Flask, jsonify, request, abort, make_response
+from flask_httpauth import HTTPBasicAuth
 
-import sys
-sys.path.append("../")
-from database import database_util
-from core import corelib
+from mrelearner.database import database_util
+from mrelearner.core import corelib
 import web_api_security
 
 ### Security Features Code ###

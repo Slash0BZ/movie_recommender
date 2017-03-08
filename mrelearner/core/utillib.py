@@ -1,6 +1,6 @@
 import sys
-sys.path.insert(0, '../database')
-import database_util
+
+from mrelearner.database import database_util
 
 # Converter is used as an abstract layer between API callers and handlers
 # It transforms Caller u_id conventions and imdb_id to learner u_id and m_id

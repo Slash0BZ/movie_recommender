@@ -7,16 +7,19 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import cross_val_score
 import pickle
 import base64
-sys.path.insert(0, '../database')
-sys.path.insert(1, '../train')
-import database_util
-import mrlib
+
+from mrelearner.database import database_util
+from mrelearner.train import mrlib
 import datetime
+
+
+from os import path
+
 
 # Learner is in charge of building models and saving models to database
 class Learner:
-
-	log_path = '../log/'
+        here = path.abspath(path.dirname(__file__))
+	log_path = here + '/../log/'
 
 	u_id = 0
 	db = object()
@@ -30,6 +33,8 @@ class Learner:
 	tag_learner = svm.SVC(probability=True)
 	average_rating = 0.0
 
+        
+        
 	def __init__(self, _u_id):
 		self.u_id = _u_id
 		self.db = database_util.database()
@@ -148,7 +153,8 @@ class Learner:
 # Predictor is in charge of retriving models and predict on movies based on models
 class Predictor:
 
-	log_path = '../log/'
+        here = path.abspath(path.dirname(__file__))
+	log_path = here + '/../log/'
 
 	u_id = 0
 	db = object()
