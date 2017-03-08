@@ -1,21 +1,33 @@
 
 from flask import Flask, jsonify, request, abort
+from flask.ext.httpauth import HTTPBasicAuth
 
 import sys
 sys.path.append("../")
 from database import database_util
 from core import corelib
+import web_api_security
+
+### Security Features Code ###
+auth = HTTPBasicAuth()
+
+@auth.get_password
+def get_password(username):
+    if username == web_api_security.web_api_username():
+        return web_api_security.web_api_password()
+    return None
+
+@auth.error_handler
+def unauthorized():
+    return make_response(jsonify({'error': 'Unauthorized access'}), 401)
+### End Security Features Code ###
 
 
 app = Flask(__name__)
 
 
-# for development purposes
-@app.route('/mrelearner/api/v1.0/history', methods=['GET'])
-def get_history():
-    return jsonify({'history': history})
-
 @app.route('/mrelearner/api/v1.0/history', methods=['POST'])
+@auth.login_required
 def update_history():
     if not request.json: 
         abort(400)
@@ -35,6 +47,7 @@ def update_history():
 
 
 @app.route('/mrelearner/api/v1.0/recommender',methods=['POST'])
+@auth.login_required
 def get_recommendation():
     if not request.json: 
         abort(400)

@@ -2,6 +2,19 @@
 ######################
 venv
 
-# Compile Python #
+# Backup Files #
+################
+*~
+
+# Secret Files #
+################
+database/secret.py
+webapi/web_api_security.py
+webapi/example.py
+
+# Compiled Python #
 ##################
 *.pyc
+
+
+
