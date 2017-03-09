@@ -6,7 +6,13 @@ Status:
 The learning part of the project movie recommender.
 
 ## Install
+
 run ```pip install --editable .```
+
+Create a secret.py under ```mrelearner/database```, follow the interface of ```example_secret.py```, for you own database.
+
+Currently, we are using MS-ODBC for database driver.
+
 
 ## Log
 
