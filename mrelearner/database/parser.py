@@ -1,8 +1,8 @@
 import database_util
 import re
 import sys
-sys.path.insert(0, '../train')
-import mrlib
+
+from mrelearner.train import mrlib
 
 db = database_util.database()
 movie_info_file = '../data/movies.csv'

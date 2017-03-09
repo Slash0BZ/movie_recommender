@@ -7,8 +7,8 @@ import datetime
 import os.path
 from enum import Enum
 class database:
-		
-	log_path = '../log/'
+        here = os.path.abspath(os.path.dirname(__file__))
+	log_path = here + '/../log/'
 
 	server = secret.get_server_key()
 	database = secret.get_database_key()

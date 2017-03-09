@@ -1,8 +1,9 @@
 import mrlib
 import numpy as np
 import sys
-sys.path.insert(0, '../database')
-import database_util
+
+#sys.path.insert(0, '../database')
+from mrelearner.database import database_util
 
 
 def initTest(i):

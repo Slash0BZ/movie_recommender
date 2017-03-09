@@ -1,6 +1,7 @@
-# Python virtualenve #
+# Python virtualenv #
 ######################
 venv
+mrelearner.egg-info
 
 # Backup Files #
 ################
@@ -8,9 +9,9 @@ venv
 
 # Secret Files #
 ################
-database/secret.py
-webapi/web_api_security.py
-webapi/example.py
+mrelearner/database/secret.py
+mrelearner/webapi/web_api_security.py
+mrelearner/webapi/example.py
 
 # Compiled Python #
 ##################

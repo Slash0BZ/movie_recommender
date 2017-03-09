@@ -7,7 +7,7 @@ install:
  - sudo apt-get install unixodbc-dev
  - pip install -r requirements.txt
 
-script: python tests/test.py
+script: python mrelearner/tests/test.py
 
 notifications:
   email: false
