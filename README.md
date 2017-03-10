@@ -20,7 +20,7 @@ Install the package using the instructions above.
 
 Make sure apache2 and openssl are isntalled.
 
-Create an certificate and key using ```openssl req -new -x509 -days 365 -sha1 -newkey rsa:1024 -nodes -keyout server.key -out server.crt -subj '/O=Company/OU=Department/CN=ec2-54-200-205-223.us-west-2.compute.amazonaws.com/'```
+Create an certificate and key using ```openssl req -new -x509 -days 365 -sha1 -newkey rsa:1024 -nodes -keyout server.key -out server.crt -subj '/O=Company/OU=Department/CN=www.example.com/'```
 
 Move web_api.wsgi to a location under ```/var/www/```.
 
