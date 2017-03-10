@@ -273,9 +273,3 @@ class Predictor:
 
 		self.write_log("user %s num %s recommend %s" % (self.u_id, num, ' '.join(str(e) for e in ret)), "predictor")
 		return ret
-			
-		
-		
-		
-
-		

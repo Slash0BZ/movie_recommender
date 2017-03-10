@@ -1,4 +1,5 @@
 import corelib
+from utillib import Converter
 
 def testLearn(i):
 	learner = corelib.Learner(i)
@@ -15,3 +16,10 @@ def testPredict(i):
 
 testLearn(12)
 testPredict(12)
+
+#test utillib
+converter = Converter()
+print(converter.imdbid2mid(114709))
+print(converter.mid2imdbid(1))
+print(converter.imdbid2mid_batch([114709,113497,113228]))
+print(converter.mid2imdbid_batch([1,2,3]))

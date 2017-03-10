@@ -7,7 +7,8 @@ import datetime
 import os.path
 from enum import Enum
 class database:
-        here = os.path.abspath(os.path.dirname(__file__))
+
+	here = os.path.abspath(os.path.dirname(__file__))
 	log_path = here + '/../log/'
 
 	server = secret.get_server_key()
@@ -118,6 +119,44 @@ class database:
 		row = self.cursor.fetchone()
 		return row
 
+	def get_mid_from_imdbid(self, imdb_id):
+		self.cursor.execute("SELECT id FROM movie_info WHERE imdb_id=?", imdb_id)
+		result = self.cursor.fetchall()
+		if (len(result) == 0):
+			return -1
+		elif (len(result) >= 2):
+			return -2
+		else:
+			return result[0][0]
+
+	def get_imdbid_from_mid(self, m_id):
+		self.cursor.execute("SELECT imdb_id FROM movie_info WHERE id=?", m_id)
+		result = self.cursor.fetchall()
+		if (len(result) == 0):
+			return -1
+		elif (len(result) >= 2):
+			return -2
+		else:
+			return int(result[0][0])
+
+	def get_mid_from_imdbid_batch(self, imdb_ids):
+		statement = "SELECT id FROM movie_info WHERE imdb_id IN " + str(tuple(imdb_ids))
+		self.cursor.execute(statement)
+		result = self.cursor.fetchall()
+		if (len(result) == 0):
+			return -1
+		else:
+			return [row[0] for row in result]
+
+	def get_imdbid_from_mid_batch(self, m_ids):
+		statement = "SELECT imdb_id FROM movie_info WHERE id IN " + str(tuple(m_ids))
+		self.cursor.execute(statement)
+		result = self.cursor.fetchall()
+		if (len(result) == 0):
+			return -1
+		else:
+			return [int(row[0]) for row in result]
+
 	# Add user history into user_history table
 	# Write log after the operation finishes
 	def add_user_history(self, u_id, m_id, rating, timestamp):
@@ -180,6 +219,7 @@ class database:
 	def get_user_model(self, u_id):
 		self.cursor.execute("SELECT * FROM user_model WHERE u_id=?", u_id)
 		return self.cursor.fetchall()
+
 	
 # table user_info
 # u_id (int): the user id for learning db
