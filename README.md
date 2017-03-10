@@ -24,7 +24,7 @@ Create an certificate and key using ```openssl req -new -x509 -days 365 -sha1 -n
 
 Move web_api.wsgi to a location under ```/var/www/```.
 
-Edit ```mrelearner_webapi.conf``` with the following: your own server name(url), the paths to your own certificate and key, the path to where you put the .wsgi file.
+Edit ```mrelearner_webapi.conf``` with the following: your own server name(url), the paths to your own certificate and key, and the path to where you put the .wsgi file.
 
 run ```a2enmod ssl```
 
