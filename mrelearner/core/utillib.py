@@ -22,7 +22,7 @@ class Converter:
 	# -1 if the input does not match the database
 	def imdbid2mid(self, imdb_id):
 		#TODO
-		return
+		return self.db.get_mid_from_imdbid(imdb_id)
 	
 	# @params
 	# m_id: a single m_id
@@ -31,7 +31,7 @@ class Converter:
 	# -1 if m_id is not valid
 	def mid2imdbid(self, m_id):
 		#TODO
-		return
+		return self.db.get_imdbid_from_mid(m_id)
 	
 	# @params
 	# imdb_ids: an array of imdb_id
@@ -40,7 +40,7 @@ class Converter:
 	# An array of m_ids
 	def imdbid2mid_batch(self, imdb_ids):
 		#TODO
-		return
+		return self.db.get_mid_from_imdbid_batch(imdb_ids)
 		
 	# @params
 	# m_ids: an array of imdb_id
@@ -49,7 +49,7 @@ class Converter:
 	# An array of imdb_ids
 	def mid2imdbid_batch(self, m_ids):
 		#TODO
-		return
+		return self.db.get_imdbid_from_mid_batch(m_ids)
 	
 	# callerid: the user identifier used by caller
 	# uid: internal u_id of learner
