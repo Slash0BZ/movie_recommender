@@ -29,7 +29,15 @@ app = Flask(__name__)
 def update_history():
     if not request.json: 
         abort(400)
-
+    if not "user_id" in request.json:
+        abort(400)
+    if not "movie_imdb_id" in request.json:
+        abort(400)
+    if not "user_rating" in request.json:
+        abort(400)
+    if not "timestamp" in request.json:
+        abort(400)
+        
     user_id = request.json['user_id']
     movie_imdb_id = request.json["movie_imdb_id"]
     user_rating = request.json["user_rating"]
@@ -49,7 +57,9 @@ def update_history():
 def get_recommendation():
     if not request.json: 
         abort(400)
-
+    if not "user_id" in request.json:
+        abort(400)
+        
     user_id = request.json["user_id"]
     candidate_list = request.json.get("candidate_list")
     num_recommendations = request.json.get("num_recommendations")
