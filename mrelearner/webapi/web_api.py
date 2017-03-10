@@ -49,13 +49,22 @@ def update_history():
 def get_recommendation():
     if not request.json: 
         abort(400)
+
     user_id = request.json["user_id"]
-    candidate_list = request.json["candidate_list"]
-    predictor = corelib.Predictor(user_id)
-    predictor.getMovies(candidate_list)
-    result = predictor.getRecommendations(5)
-    return jsonify({"result": result}), 200
-    #return predict(user_id, condidate_list)
+    candidate_list = request.json.get("candidate_list")
+    num_recommendations = request.json.get("num_recommendations")
+
+    if not num_recommendations:
+        num_recommendations = 5
+
+    if candidate_list:
+        predictor = corelib.Predictor(user_id)
+        predictor.getMovies(candidate_list)
+        result = predictor.getRecommendations(5)
+        return jsonify({"result": result}), 200
+    else:
+        #What to do if candidate_list is not given
+        return "not implemented yet", 200
 
     
 if __name__ == '__main__':
