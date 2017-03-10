@@ -7,7 +7,8 @@ import datetime
 import os.path
 from enum import Enum
 class database:
-        here = os.path.abspath(os.path.dirname(__file__))
+
+	here = os.path.abspath(os.path.dirname(__file__))
 	log_path = here + '/../log/'
 
 	server = secret.get_server_key()
@@ -218,6 +219,7 @@ class database:
 	def get_user_model(self, u_id):
 		self.cursor.execute("SELECT * FROM user_model WHERE u_id=?", u_id)
 		return self.cursor.fetchall()
+
 	
 # table user_info
 # u_id (int): the user id for learning db
