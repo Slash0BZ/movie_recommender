@@ -67,8 +67,11 @@ def get_recommendation():
     if not num_recommendations:
         num_recommendations = 5
 
+    predictor = corelib.Predictor(user_id)
+    if predictor.invalid_user:
+        return jsonify({"result": "no model"}), 200
+        
     if candidate_list:
-        predictor = corelib.Predictor(user_id)
         predictor.getMovies(candidate_list)
         result = predictor.getRecommendations(5)
         return jsonify({"result": result}), 200
