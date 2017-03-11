@@ -26,6 +26,8 @@ Move web_api.wsgi to a location under ```/var/www/```.
 
 Edit ```mrelearner_webapi.conf``` with the following: your own server name(url), the paths to your own certificate and key, and the path to where you put the .wsgi file.
 
+Move ```mrelearner_webapi.com``` to /etc/apache2/sites-available/ .
+
 run ```a2enmod ssl```
 
 Restart apache.
