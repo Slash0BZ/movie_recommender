@@ -119,6 +119,15 @@ class database:
 		row = self.cursor.fetchone()
 		return row
 
+	def get_movie_info_batch(self, m_ids):
+		statement = "SELECT * FROM movie_info WHERE id IN " + str(tuple(m_ids))
+		self.cursor.execute(statement)
+		result = self.cursor.fetchall()
+		if (len(result) == 0):
+			return -1
+		else:
+			return result
+
 	def get_mid_from_imdbid(self, imdb_id):
 		self.cursor.execute("SELECT id FROM movie_info WHERE imdb_id=?", imdb_id)
 		result = self.cursor.fetchall()
