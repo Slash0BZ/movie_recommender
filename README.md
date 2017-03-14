@@ -18,7 +18,7 @@ run ```pip install --editable .```
 ## Deploy
 Install the package using the instructions above.
 
-Make sure apache2 and openssl are isntalled.
+Make sure apache2, mod-wsgi and openssl are isntalled.
 
 Create an certificate and key using ```openssl req -new -x509 -days 365 -sha3 -newkey rsa:2048 -nodes -keyout server.key -out server.crt -subj '/O=Company/OU=Department/CN=www.example.com/'```
 
@@ -26,9 +26,10 @@ Move web_api.wsgi to a location under ```/var/www/```.
 
 Edit ```mrelearner_webapi.conf``` with the following: your own server name(url), the paths to your own certificate and key, and the path to where you put the .wsgi file.
 
-Move ```mrelearner_webapi.com``` to /etc/apache2/sites-available/ .
+Move ```mrelearner_webapi.conf``` to /etc/apache2/sites-available/ .
 
 run ```a2enmod ssl```
+run ```a2ensite mrelearner_webapi```
 
 Restart apache.
 
