@@ -14,12 +14,12 @@ def testPredict(i):
 	result = predictor.getRecommendations(2)
 	print(result)
 
-testLearn(12)
+# testLearn(12)
 testPredict(12)
 
 #test utillib
-converter = Converter()
-print(converter.imdbid2mid(114709))
-print(converter.mid2imdbid(1))
-print(converter.imdbid2mid_batch([114709,113497,113228]))
-print(converter.mid2imdbid_batch([1,2,3]))
+# converter = Converter()
+# print(converter.imdbid2mid(114709))
+# print(converter.mid2imdbid(1))
+# print(converter.imdbid2mid_batch([114709,113497,113228]))
+# print(converter.mid2imdbid_batch([1,2,3]))

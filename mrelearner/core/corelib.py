@@ -12,6 +12,8 @@ from mrelearner.database import database_util
 from mrelearner.train import mrlib
 import datetime
 
+import numpy as np
+
 
 from os import path
 
@@ -220,9 +222,8 @@ class Predictor:
 			print("[ERROR]: Unknown error")
 	
 	# return a score of a movie
-	def score(self, m_id):
+	def score(self, m_id, info):
 		# TODO: Improve
-		info = self.db.get_movie_info(m_id)
 		t_feature = self.db.s2a(info[5])
 		g_feature = self.parser.genre2vec(info[2])
 		
@@ -243,12 +244,18 @@ class Predictor:
 		overall_score = 0.9 * tag_score + 0.1 * genre_score
 
 		return overall_score
-	
+	#only first Nth number is accurate (use )
 	def sort(self):
-		for m in self.movies:
-			s = self.score(m)
-			self.movie_score.append((m, s))
+
+		info = self.db.get_movie_info_batch(self.movies)
+		movie_score = np.zeros((len(self.movies), 2))
+		for i,m in enumerate(self.movies):
+			s = self.score(m,info[i])
+			movie_score[i] = np.array([m, s])
+#			self.movie_score.append((m, s))
+		self.movie_score = movie_score.tolist()
 		self.movie_score.sort(key = lambda x : x[1], reverse=True)
+
 		self.write_log("user %s movie_score %s" % (self.u_id, ' '.join(str(e) for e in self.movie_score)), "predictor")
 	
 	def onlyOneClass(self):
