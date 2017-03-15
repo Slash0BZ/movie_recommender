@@ -246,6 +246,8 @@ class Predictor:
 		overall_score = 0.9 * tag_score + 0.1 * genre_score
 
 		return overall_score
+
+
 	#only first Nth number is accurate (use argpartition)
 	def partitionLargestKth(self, num):
 
@@ -296,3 +298,6 @@ class Predictor:
 
 		self.write_log("user %s num %s recommend %s" % (self.u_id, num, ' '.join(str(e) for e in ret)), "predictor")
 		return ret
+
+
+	
