@@ -21,7 +21,6 @@ class Converter:
 	# A single m_id if the input matches the database
 	# -1 if the input does not match the database
 	def imdbid2mid(self, imdb_id):
-		#TODO
 		return self.db.get_mid_from_imdbid(imdb_id)
 	
 	# @params
@@ -30,7 +29,6 @@ class Converter:
 	# A single imdb_id.
 	# -1 if m_id is not valid
 	def mid2imdbid(self, m_id):
-		#TODO
 		return self.db.get_imdbid_from_mid(m_id)
 	
 	# @params
@@ -39,7 +37,6 @@ class Converter:
 	# @return
 	# An array of m_ids
 	def imdbid2mid_batch(self, imdb_ids):
-		#TODO
 		return self.db.get_mid_from_imdbid_batch(imdb_ids)
 		
 	# @params
@@ -48,7 +45,6 @@ class Converter:
 	# @return
 	# An array of imdb_ids
 	def mid2imdbid_batch(self, m_ids):
-		#TODO
 		return self.db.get_imdbid_from_mid_batch(m_ids)
 	
 	# callerid: the user identifier used by caller
@@ -65,3 +61,26 @@ class Converter:
 	# return -1 if u_id does not exists
 	def uid2callerid(self, u_id):
 		return self.db.get_identifier(u_id)
+
+
+class PoolGenerator:
+
+	db = object()
+	imdb_list = list()
+	m_id_list = list()
+	converter = object()
+
+	def __init__(self, input_list):
+		self.db = database_util.database()
+		self.converter = Converter()
+		self.imdb_list = input_list
+		self.fill_m_id_list()
+
+	def fill_m_id_list(self):
+		if (len(self.imdb_list) == 0):
+			return
+		self.m_id_list = converter.imdbid2mid_batch(self.imdb_list)
+		
+		# If imdb_id passed does not exist, remove from m_id
+		self.m_id_list = [x for x in self.m_id_list if x != -1]
+
