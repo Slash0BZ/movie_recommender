@@ -22,7 +22,7 @@ from os import path
 
 # Learner is in charge of building models and saving models to database
 class Learner:
-        here = path.abspath(path.dirname(__file__))
+	here = path.abspath(path.dirname(__file__))
 	log_path = here + '/../log/'
 
 	u_id = 0
@@ -157,7 +157,7 @@ class Learner:
 # Predictor is in charge of retriving models and predict on movies based on models
 class Predictor:
 
-        here = path.abspath(path.dirname(__file__))
+	here = path.abspath(path.dirname(__file__))
 	log_path = here + '/../log/'
 
 	u_id = 0
