@@ -14,13 +14,15 @@ import datetime
 
 import numpy as np
 
+import bottleneck as bn
+
 
 from os import path
 
 
 # Learner is in charge of building models and saving models to database
 class Learner:
-        here = path.abspath(path.dirname(__file__))
+	here = path.abspath(path.dirname(__file__))
 	log_path = here + '/../log/'
 
 	u_id = 0
@@ -65,15 +67,15 @@ class Learner:
 			self.movies.append(h[1])
 			self.ratings.append(h[2])
 
-		for m in self.movies:
+		info = self.db.get_movie_info_batch(self.movies)
+		for i,m in enumerate(self.movies):
 			# TODO: Figure out how to do with empty tag
-			info = self.db.get_movie_info(m)
-			t = self.db.s2a(info[5])
+			t = self.db.s2a(info[i][5])
 			if  (len(t) != 1128):
 				t = list()
 				for i in range(0, 1128):
 					t.append(0.0)
-			g = self.parser.genre2vec(info[2])
+			g = self.parser.genre2vec(info[i][2])
 			self.genre_features.append(g)
 			self.tag_features.append(t)
 	
@@ -155,7 +157,7 @@ class Learner:
 # Predictor is in charge of retriving models and predict on movies based on models
 class Predictor:
 
-        here = path.abspath(path.dirname(__file__))
+	here = path.abspath(path.dirname(__file__))
 	log_path = here + '/../log/'
 
 	u_id = 0
@@ -244,17 +246,30 @@ class Predictor:
 		overall_score = 0.9 * tag_score + 0.1 * genre_score
 
 		return overall_score
-	#only first Nth number is accurate (use )
-	def sort(self):
+
+
+	#only first Nth number is accurate (use argpartition)
+	def partitionLargestKth(self, num):
 
 		info = self.db.get_movie_info_batch(self.movies)
-		movie_score = np.zeros((len(self.movies), 2))
+		movie_score_all = np.zeros((len(self.movies), 2))
 		for i,m in enumerate(self.movies):
 			s = self.score(m,info[i])
-			movie_score[i] = np.array([m, s])
+			movie_score_all[i] = np.array([m, s])
 #			self.movie_score.append((m, s))
+
+		#bn.argpartition make sure elements before kth position is the smallest kth. (-movie_score means we get largest kth)
+		#http://berkeleyanalytics.com/bottleneck/reference.html#bottleneck.argpartition
+		idxs = bn.argpartition(-movie_score_all[:,1], num)[:num]
+
+		movie_score = np.zeros((num,2))
+		movie_score = movie_score_all[idxs]
+
+		#only sort largest Kth element
+		movie_score[:num] = movie_score[np.argsort((-movie_score[:num, 1]))]
+
 		self.movie_score = movie_score.tolist()
-		self.movie_score.sort(key = lambda x : x[1], reverse=True)
+#		self.movie_score.sort(key = lambda x : x[1], reverse=True)
 
 		self.write_log("user %s movie_score %s" % (self.u_id, ' '.join(str(e) for e in self.movie_score)), "predictor")
 	
@@ -271,12 +286,18 @@ class Predictor:
 		if (self.invalid_user):
 			return list()
 		ret = list()
-		self.sort()
+
 		if (num > len(self.movies)):
 			num = len(self.movies)
+
+		self.partitionLargestKth(num)
+		
 		for i in range(0, num):
-			(mid, score) = self.movie_score[i]
-			ret.append(mid)
+			m_score = self.movie_score[i]
+			ret.append(m_score)
 
 		self.write_log("user %s num %s recommend %s" % (self.u_id, num, ' '.join(str(e) for e in ret)), "predictor")
 		return ret
+
+
+	
