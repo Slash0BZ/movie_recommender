@@ -71,10 +71,8 @@ class Learner:
 		for i,m in enumerate(self.movies):
 			# TODO: Figure out how to do with empty tag
 			t = self.db.s2a(info[i][5])
-			if  (len(t) != 1128):
-				t = list()
-				for i in range(0, 1128):
-					t.append(0.0)
+			if  (t.shape[0] != 1128):
+				t = np.zeros(1128)
 			g = self.parser.genre2vec(info[i][2])
 			self.genre_features.append(g)
 			self.tag_features.append(t)
@@ -99,10 +97,10 @@ class Learner:
 		if (len(self.ratings) != len(self.tag_features)):
 			return False
 		for t in self.tag_features:
-			if len(t) != 1128:
+			if t.shape[0] != 1128:
 				return False
 		for g in self.genre_features:
-			if len(g) != 20:
+			if g.shape[0] != 20:
 				return False
 		return True
 	
@@ -122,7 +120,7 @@ class Learner:
 	def train_tag(self):
 		assert(len(self.tag_features) == len(self.classes))
 		for t in self.tag_features:
-			assert(len(t) == 1128)
+			assert(t.shape[0] == 1128)
 		self.tag_learner.fit(self.tag_features, self.classes)
 	
 	def onlyOneClass(self):
@@ -208,7 +206,7 @@ class Predictor:
 	def getMovies(self, _movies):
 		if (len(_movies) == 0):
 			self.processError(0)
-		self.movies = _movies
+		self.movies = np.array(_movies)
 
 	def processError(self, error_code):
 		if (error_code == 0):
@@ -252,7 +250,7 @@ class Predictor:
 	def partitionLargestKth(self, num):
 
 		info = self.db.get_movie_info_batch(self.movies)
-		movie_score_all = np.zeros((len(self.movies), 2))
+		movie_score_all = np.zeros((self.movies.shape[0], 2))
 		for i,m in enumerate(self.movies):
 			s = self.score(m,info[i])
 			movie_score_all[i] = np.array([m, s])
@@ -268,7 +266,7 @@ class Predictor:
 		#only sort largest Kth element
 		movie_score[:num] = movie_score[np.argsort((-movie_score[:num, 1]))]
 
-		self.movie_score = movie_score.tolist()
+		self.movie_score = movie_score
 #		self.movie_score.sort(key = lambda x : x[1], reverse=True)
 
 		self.write_log("user %s movie_score %s" % (self.u_id, ' '.join(str(e) for e in self.movie_score)), "predictor")
@@ -287,13 +285,13 @@ class Predictor:
 			return list()
 		ret = list()
 
-		if (num > len(self.movies)):
-			num = len(self.movies)
+		if (num > self.movies.shape[0]):
+			num = self.movies.shape[0]
 
 		self.partitionLargestKth(num)
 		
 		for i in range(0, num):
-			m_score = self.movie_score[i]
+			m_score = self.movie_score[i].tolist()
 			ret.append(m_score)
 
 		self.write_log("user %s num %s recommend %s" % (self.u_id, num, ' '.join(str(e) for e in ret)), "predictor")

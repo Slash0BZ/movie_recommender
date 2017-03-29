@@ -6,6 +6,7 @@ import secret
 import datetime
 import os.path
 from enum import Enum
+import numpy as np
 class database:
 
 	here = os.path.abspath(os.path.dirname(__file__))
@@ -107,11 +108,12 @@ class database:
 	
 	def s2a(self, s):
 		group = s.split("|")
-		ret = list()
-		for g in group:
-			if (g == ''):
+		ret = np.zeros(1128)
+		for i in range(1128):
+			if group[i] == '':
 				continue
-			ret.append(float(g) / 100.0)
+			ret[i] = float(group[i])
+		ret /= 100.0
 		return ret
 	
 	def get_movie_info(self, m_id):
