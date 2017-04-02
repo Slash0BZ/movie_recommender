@@ -4,7 +4,7 @@ from flask_httpauth import HTTPBasicAuth
 
 from mrelearner.database import database_util
 from mrelearner.core import corelib
-fore mrelearner.core import utilib
+from mrelearner.core import utilib
 import web_api_security
 
 ### Security Features Code ###
