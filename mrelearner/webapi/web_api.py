@@ -25,6 +25,12 @@ def unauthorized():
 app = Flask(__name__)
 
 
+# For testing purposes                                                          
+@app.route('/')
+def hello_world():
+    return 'Hello, World!'
+
+
 @app.route('/mrelearner/api/v1.0/history', methods=['POST'])
 @auth.login_required
 def update_history():
