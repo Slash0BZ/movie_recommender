@@ -4,6 +4,7 @@ from flask_httpauth import HTTPBasicAuth
 
 from mrelearner.database import database_util
 from mrelearner.core import corelib
+fore mrelearner.core import utilib
 import web_api_security
 
 ### Security Features Code ###
@@ -43,7 +44,11 @@ def update_history():
     user_rating = request.json["user_rating"]
     timestamp = request.json["timestamp"]
     db = database_util.database()
-    db.add_user_history(user_id, movie_imdb_id, user_rating, timestamp)
+    conv = utilib.Converter()
+
+    our_mid = conv.imdbid2mid(movie_imdb_id)
+    our_uid = conv.callerid2uid(user_id)
+    db.add_user_history(our_uid, our_mid, user_rating, timestamp)
 
     #retrain the model
     #learner = corelib.Learner(user_id)
@@ -64,16 +69,21 @@ def get_recommendation():
     candidate_list = request.json.get("candidate_list")
     num_recommendations = request.json.get("num_recommendations")
 
+    conv = utilib.Converter()
+
+    our_uid = conv.callerid2uid(user_id)
+    
     if not num_recommendations:
         num_recommendations = 5
-
-    predictor = corelib.Predictor(user_id)
+        
+    predictor = corelib.Predictor(our_uid)
     if predictor.invalid_user:
         return jsonify({"result": "no model"}), 200
         
     if candidate_list:
-        predictor.getMovies(candidate_list)
-        result = predictor.getRecommendations(5)
+        our_ids_candidate_list = conv.imdbid2mid_batch(candidate_list)
+        predictor.getMovies(our_ids_candidate_list)
+        result = predictor.getRecommendations(num_recommendations)
         return jsonify({"result": result}), 200
     else:
         #What to do if candidate_list is not given
