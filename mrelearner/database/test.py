@@ -13,6 +13,7 @@ d = database_util.database()
 print d.get_movie_info_batch(range(10))
 print '====='
 result = []
-for i in range(10):
-	result.append(tuple(d.get_movie_info(i))
+m_id = d.get_all_movie_id()[:10]
+for i in m_id:
+	result.append(tuple(d.get_movie_info(i)))
 print result

@@ -12,11 +12,15 @@ class database:
 	here = os.path.abspath(os.path.dirname(__file__))
 	log_path = here + '/../log/'
 
+	#auth info for database
 	server = secret.get_server_key()
 	database = secret.get_database_key()
 	username = secret.get_username_key()
 	password = secret.get_password_key()
 	driver= '{ODBC Driver 13 for SQL Server}'
+
+	# cnxn: the connection to the database
+	# cursor: the cursor to the connection
 	cursor = object()
 	cnxn = object()
 
@@ -30,7 +34,7 @@ class database:
 		self.connect()
 		
 	
-	# Get callde everytime a database object is collected
+	# Disconnect from the database when thsi class object is being destroyed(see connect())
 	def __del__(self):
 		self.cursor.close()
 		del self.cursor
@@ -51,6 +55,8 @@ class database:
 		self.cursor.close()
 
 	# Write a msg with time to the end of the log_file
+	# log files are saved according to log_path variable
+	# log file will be created when log_file_name.log does not exist in log_path 
 	def write_log(self, msg, log_file_name):
 		log_file = self.log_path + log_file_name + ".log"
 		time_string = str(datetime.datetime.now())
@@ -78,6 +84,7 @@ class database:
 		self.cnxn.commit()
 		self.write_log("INSERT movie_info %s %s %s" % (name, genre, year), 'movie_info')
 	
+	# Get a list of (movielens) movie ids from the database (movie id not equal to imdbid)
 	def get_all_movie_id(self):
 		self.cursor.execute("SELECT id FROM movie_info")
 		arr = self.cursor.fetchall()
@@ -94,10 +101,14 @@ class database:
 		# TO DO
 		self.cursor.execute("ALTER TABLE ? ADD ? ?", table_name, column_name, column_type)
 	
+	#For the selected movie id in database, update its imdb_id and tag_features
 	def add_feature_to_movie(self, m_id, imdb_id, feature):
 		self.cursor.execute("UPDATE movie_info SET imdb_id=?, tag_feature=? WHERE id=?", imdb_id, feature, m_id)
 		self.cnxn.commit()
 
+	#array to string
+	#currently used only for combining tag_feature
+	#convert array of float into "|" separated string
 	def a2s(self, arr):
 		ret = ''
 		for a in arr:
@@ -106,6 +117,9 @@ class database:
 			ret = ret + "|" + str(a)
 		return ret
 	
+	#array to string
+	#currently used only for spliting tag_feature
+	#convert "|" separated string into array of float
 	def s2a(self, s):
 		group = s.split("|")
 		ret = np.zeros(1128)
@@ -116,11 +130,13 @@ class database:
 		ret /= 100.0
 		return ret
 	
+	# return movie_info (id,name,genre,year,imdb_id,feature) of selected movie id
 	def get_movie_info(self, m_id):
 		self.cursor.execute("SELECT * FROM movie_info WHERE id=?", m_id)
 		row = self.cursor.fetchone()
 		return row
 
+	# return movie_info (id,name,genre,year,imdb_id,feature) of selected movie ids in the m_ids list
 	def get_movie_info_batch(self, m_ids):
 		statement = "SELECT * FROM movie_info WHERE id IN " + str(tuple(m_ids))
 		self.cursor.execute(statement)
@@ -130,6 +146,9 @@ class database:
 		else:
 			return result
 
+	# For a movie imdb_id, get its associated (movielens) m_id
+	# return non negative integer if match is found
+	# return -1 if no match, -2 if duplicate exists 
 	def get_mid_from_imdbid(self, imdb_id):
 		self.cursor.execute("SELECT id FROM movie_info WHERE imdb_id=?", imdb_id)
 		result = self.cursor.fetchall()
@@ -140,6 +159,9 @@ class database:
 		else:
 			return result[0][0]
 
+	# For a movie marked by (movielens) m_id, get its associated imdb_id
+	# return non negative integer if match is found
+	# return -1 if no match, -2 if duplicate exists 
 	def get_imdbid_from_mid(self, m_id):
 		self.cursor.execute("SELECT imdb_id FROM movie_info WHERE id=?", m_id)
 		result = self.cursor.fetchall()
@@ -150,6 +172,8 @@ class database:
 		else:
 			return int(result[0][0])
 
+	# see get_mid_from_imdbid
+	# get all associated (movielens) m_id in one database access
 	def get_mid_from_imdbid_batch(self, imdb_ids):
 		statement = "SELECT id FROM movie_info WHERE imdb_id IN " + str(tuple(imdb_ids))
 		self.cursor.execute(statement)
@@ -159,6 +183,8 @@ class database:
 		else:
 			return [row[0] for row in result]
 
+	#see get_imdbid_from_mid
+	# get all associated imdb_id in one database access
 	def get_imdbid_from_mid_batch(self, m_ids):
 		statement = "SELECT imdb_id FROM movie_info WHERE id IN " + str(tuple(m_ids))
 		self.cursor.execute(statement)
@@ -168,7 +194,7 @@ class database:
 		else:
 			return [int(row[0]) for row in result]
 
-	# Add user history into user_history table
+	# Add/Update user history into user_history table
 	# Write log after the operation finishes
 	def add_user_history(self, u_id, m_id, rating, timestamp):
 		self.cursor.execute("SELECT * FROM user_history WHERE u_id=? AND m_id=?", u_id, m_id)
@@ -190,7 +216,7 @@ class database:
 
 #table user_model
 
-	#update user genre model and/or tag model
+	#update user genre model and/or tag model on the database
 	def update_user_model(self, u_id, genre_model=None, tag_model=None):
 		data = self.get_user_model(u_id)
 
@@ -218,6 +244,7 @@ class database:
 			self.cnxn.commit()
 			self.write_log("UPDATE user_model %s %s %s" % (u_id, genre_model, tag_model), 'user_model')
 	
+	#add user genre model, tag model and average to the database
 	def add_user_model(self, u_id, g_model, t_model, average):
 		self.cursor.execute("SELECT * FROM user_model WHERE u_id=?", u_id)
 		if (len(self.cursor.fetchall()) == 0):
@@ -227,6 +254,7 @@ class database:
 			self.cursor.execute("UPDATE user_model SET genre_model=?,tag_model=?,average=? WHERE u_id=?", g_model, t_model, average, u_id)
 			self.cnxn.commit()
 	
+	#get all user models (u_id, genre_model, tag_model, average) from the database
 	def get_user_model(self, u_id):
 		self.cursor.execute("SELECT * FROM user_model WHERE u_id=?", u_id)
 		return self.cursor.fetchall()
