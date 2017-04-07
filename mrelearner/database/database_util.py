@@ -123,7 +123,10 @@ class database:
 	def s2a(self, s):
 		group = s.split("|")
 		ret = np.zeros(1128)
+
 		for i in range(1128):
+			if(i>=len(group)):
+				break
 			if group[i] == '':
 				continue
 			ret[i] = float(group[i])
