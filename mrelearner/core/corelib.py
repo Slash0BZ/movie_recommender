@@ -149,62 +149,6 @@ class Learner:
 		#tag_model = base64.b64encode(tag_model)
 		self.db.add_user_model(self.u_id, genre_model, tag_model, self.average_rating)
 		self.write_log("user %s model saved" % (self.u_id), "learner")
-
-
-
-class SVMModel:
-	genre_model = svm.SVC(probability=True)
-	tag_model = svm.SVC(probability=True)
-
-	def __init__(self):
-		pass
-
-	def train(self, gen_features, gen_labels, tag_features, tag_labels):
-		self.genre_model.fit(gen_features, gen_labels)
-		self.tag_model.fit(tag_features, tag_labels)
-
-	def test(self, test_gen_features, test_tag_features, test_labels):
-		assert(len(test_gen_features) == len(test_tag_features))
-
-		test_labels = np.array(test_labels)
-
-		predict = np.zeros(len(test_gen_features))
-		for n in range(len(test_gen_features)):
-			g_matrix = self.genre_model.predict_proba(test_gen_features)
-			t_matrix = self.tag_model.predict_proba(test_tag_features)
-
-			one_index = -1
-			for i in range(0, 2):
-				if (self.tag_model.classes_[i] == 1.0):
-					one_index = i
-			if (one_index == -1):
-				self.processError(2)
-
-			tag_score = t_matrix[0][one_index]
-			genre_score = g_matrix[0][one_index]
-
-			overall_score = 0.9 * tag_score + 0.1 * genre_score
-			predict[n] = overall_score
-
-		predict_order = np.argsort(-predict)
-		actual_order = np.argsort(-test_labels)
-
-		print(predict_order)
-		print(actual_order)
-
-		count = 0
-		for i in range(len(predict_order)):
-			if(predict_order[i] != actual_order[i]):
-				count += 1
-		return 1-(count/float(len(predict_order)))
-
-
-		
-
-
-
-
-
 		
 
 
