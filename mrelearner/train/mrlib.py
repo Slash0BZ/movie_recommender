@@ -79,12 +79,11 @@ class Parser:
 	
 	def genre2vec(self, genre):
 		gl = genre.split("|")
-		ret = list()
-		for g in self.genreList:
+		ret = np.zeros(len(self.genreList))
+		for i,g in enumerate(self.genreList):
 			if g in gl:
-				ret.append(1.0)
-			else:
-				ret.append(0.0)
+				ret[i] = 1.0
+
 		return ret
 	
 	def get_movie_genre_vector(self, m_id):
