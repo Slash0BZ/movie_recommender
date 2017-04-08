@@ -1,21 +1,34 @@
 import corelib
 from utillib import Converter
+from random import shuffle
+from mrelearner.database import database_util
+from mrelearner.train import mrlib
 
 def testLearn(i):
 	learner = corelib.Learner(i)
 	learner.train()
-	learner.save_model()
+#	learner.save_model()
 
-def testPredict(i):
+def testPredict(i,arr):
 	predictor = corelib.Predictor(i)
 	#arr = [151, 253, 260, 293, 296, 318, 1370]
-	arr = [62, 70, 266, 480, 891]
 	predictor.getMovies(arr)
-	result = predictor.getRecommendations(2)
+	result = predictor.getRecommendations(4)
 	print(result)
 
+
+arr = [62, 70, 266, 480, 891,1259,1327,1548,2291,2791,2858,3565,3918]
 testLearn(12)
-testPredict(12)
+testPredict(12,arr)
+db = database_util.database()
+history = db.get_user_history(12)
+for h in history:
+	if h[1] in arr:
+		print(str(h[1])+'|||'+str(h[2]))
+
+
+
+
 
 #test utillib
 converter = Converter()
