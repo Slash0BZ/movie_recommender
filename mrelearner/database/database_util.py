@@ -78,7 +78,7 @@ class database:
 	# Write log after the operation finishes
 	def add_movie(self, m_id, name, genre, year):
 		if (self.exists_in_movie_info(name, genre, year)):
-			self.write_log("INSERT FAILURE DUE TO EXISTION %s %s %s" % (name, genre, year))
+			self.write_log("INSERT FAILURE DUE TO EXISTION %s %s %s" % (name, genre, year), 'movie_info')
 			return
 		self.cursor.execute("INSERT INTO movie_info (id,name,genre,year) VALUES (?,?,?,?)",m_id, name, genre, year)
 		self.cnxn.commit()
