@@ -4,8 +4,11 @@ from flask_httpauth import HTTPBasicAuth
 
 from mrelearner.database import database_util
 from mrelearner.core import corelib
-from mrelearner.core import utilib
+from mrelearner.core import utillib
+from mrelearner.taskqueue import tasks
 import web_api_security
+
+
 
 ### Security Features Code ###
 auth = HTTPBasicAuth()
@@ -28,8 +31,8 @@ app = Flask(__name__)
 # For testing purposes                                                          
 @app.route('/')
 def hello_world():
+    tasks.test_task.delay()
     return 'Hello, World!'
-
 
 @app.route('/mrelearner/api/v1.0/history', methods=['POST'])
 @auth.login_required
@@ -49,12 +52,13 @@ def update_history():
     movie_imdb_id = request.json["movie_imdb_id"]
     user_rating = request.json["user_rating"]
     timestamp = request.json["timestamp"]
-    db = database_util.database()
-    conv = utilib.Converter()
-
+    
+    conv = utillib.Converter()
     our_mid = conv.imdbid2mid(movie_imdb_id)
     our_uid = conv.callerid2uid(user_id)
-    db.add_user_history(our_uid, our_mid, user_rating, timestamp)
+
+    if our_mid != -1:
+        tasks.update_history.delay(our_uid, our_mid, user_rating, timestamp)
 
     #retrain the model
     #learner = corelib.Learner(user_id)
@@ -75,7 +79,7 @@ def get_recommendation():
     candidate_list = request.json.get("candidate_list")
     num_recommendations = request.json.get("num_recommendations")
 
-    conv = utilib.Converter()
+    conv = utillib.Converter()
 
     our_uid = conv.callerid2uid(user_id)
     

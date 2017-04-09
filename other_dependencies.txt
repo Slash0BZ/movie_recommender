@@ -10,3 +10,4 @@ sudo apt-get install msodbcsql mssql-tools unixodbc-dev
 sudo apt-get install apache2
 sudo apt-get install libapache2-mod-wsgi
 
+sudo apt-get install rabbitmq-server

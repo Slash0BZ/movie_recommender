@@ -62,8 +62,9 @@ setup(
         'requests==2.13.0',
         'numpy==1.12.0',
         'scikit-learn==0.18.1',
-        'sklearn==0.0'
-        'bottleneck==1.2.0'
+        'sklearn==0.0',
+        'bottleneck==1.2.0',
+        'celery==4.0.2'
     ]
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,

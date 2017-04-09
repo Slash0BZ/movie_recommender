@@ -120,7 +120,16 @@ class database:
 		return row
 
 	def get_movie_info_batch(self, m_ids):
-		statement = "SELECT * FROM movie_info WHERE id IN " + str(tuple(m_ids))
+		statement = "SELECT * FROM movie_info WHERE id IN "
+
+                if len(m_ids) > 1:
+                        statement += str(tuple(m_ids))
+                else:
+                        statement += "(" + str(m_ids[0]) + ")"
+                        
+
+                print m_ids
+                print statement
 		self.cursor.execute(statement)
 		result = self.cursor.fetchall()
 		if (len(result) == 0):

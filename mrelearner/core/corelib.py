@@ -37,6 +37,8 @@ class Learner:
 	tag_learner = svm.SVC(probability=True)
 	average_rating = 0.0
 
+        not_enough_history = False
+
         
         
 	def __init__(self, _u_id):
@@ -61,21 +63,24 @@ class Learner:
 	def getFeatures(self):
 		history = self.db.get_user_history(self.u_id)
 		if (len(history) < 2):
-			self.processError(1)	
-
+			self.processError(1)   
+                
 		for h in history:
 			self.movies.append(h[1])
 			self.ratings.append(h[2])
 
+                print len(self.movies)
+                        
 		info = self.db.get_movie_info_batch(self.movies)
+                
 		for i,m in enumerate(self.movies):
 			# TODO: Figure out how to do with empty tag
-			t = self.db.s2a(info[i][5])
+		        t = self.db.s2a(info[i][5])
 			if  (len(t) != 1128):
 				t = list()
-				for i in range(0, 1128):
+				for j in range(0, 1128):
 					t.append(0.0)
-			g = self.parser.genre2vec(info[i][2])
+		        g = self.parser.genre2vec(info[i][2])
 			self.genre_features.append(g)
 			self.tag_features.append(t)
 	
@@ -113,6 +118,7 @@ class Learner:
 		# 1: history length is too short
 		if (error_code == 1):
 			print("[ERROR]: Insufficient history")
+                        self.not_enough_history = True
 		else:
 			print("[ERROR]: Unknown error")
 	
