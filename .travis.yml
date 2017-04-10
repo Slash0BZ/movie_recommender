@@ -4,8 +4,14 @@ python:
  - "2.7"
 
 install: 
+ - wget https://packages.microsoft.com/keys/microsoft.asc
+ - wget https://packages.microsoft.com/config/ubuntu/16.04/prod.list
+ - sudo apt-key add microsoft.asc
+ - sudo cat prod.list > /etc/apt/sources.list.d/mssql.list
+ - sudo apt-get update
  - sudo apt-get install unixodbc-dev
- - pip install -r requirements.txt
+ - sudo apt-get install msodbcsql mssql-tools
+ - pip install -e .
 
 script: python mrelearner/tests/test.py
 
