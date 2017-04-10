@@ -25,28 +25,26 @@ class Learner:
 	here = path.abspath(path.dirname(__file__))
 	log_path = here + '/../log/'
 
-	u_id = 0
 	db = object()
 	parser = object()
-	movies = list()
-	ratings = list()
-	classes = list()
-	genre_features = list()
-	tag_features = list()
 	genre_learner = svm.SVC(probability=True)
 	tag_learner = svm.SVC(probability=True)
-	average_rating = 0.0
-
-        not_enough_history = False
         
 	def __init__(self, _u_id):
 		self.u_id = _u_id
 		self.db = database_util.database()
 		self.parser = mrlib.Parser()
+		self.movies = list()
+		self.ratings = list()
+		self.genre_features = list()
+		self.tag_features = list()
+		self.classes = list()
+        self.not_enough_history = False
+		self.average_rating = 0.0
 		self.getFeatures()
+		self.genClasses()
 		if (self.validateFeature() == False):
 			self.processError(0)
-		self.genClasses()
 
 
 	# Write a msg with time to the end of the log_file
@@ -172,18 +170,19 @@ class Predictor:
 	u_id = 0
 	db = object()
 	parser = object()
-	genre_model = ''
-	tag_model = ''
-	genre_learner = object()
-	tag_learner = object()
-	movies = list()
-	movie_score = list()
-	invalid_user = False
 
 	def __init__(self, _u_id):
 		self.u_id = _u_id
 		self.db = database_util.database()
 		self.parser = mrlib.Parser()
+		self.genre_model = ''
+		self.tag_model = ''
+		self.movies = list()
+		self.movie_score = list()
+		self.invalid_user = False
+		self.genre_learner = object()
+		self.tag_learner = object()
+		self.invalid_user = False
 		self.getModels()
 		if (self.onlyOneClass() == False and self.invalid_user == False):
 			self.loadModels()
