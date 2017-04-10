@@ -22,7 +22,7 @@ install:
 script: coverage run mrelearner/tests/test.py
 
 after_success:
- - codecov
+ - codecov --token=122111eb-a654-4bbb-beb4-a997ea97837b
 
 notifications:
   email: false
