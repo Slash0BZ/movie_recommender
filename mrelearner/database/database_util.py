@@ -188,14 +188,17 @@ class database:
 	# get all associated (movielens) m_id in one database access
 	def get_mid_from_imdbid_batch(self, imdb_ids):
 		statement = "SELECT id FROM movie_info WHERE imdb_id IN "
-                if len(imdb_ids) == 0:
+                imdb_id_ints = []
+                for i in imdb_ids:
+                        imdb_id_ints.append(int(i))
+                if len(imdb_id_ints) == 0:
                         return -1
-                elif len(imdb_ids) > 1:
-                        statement += str(tuple(imdb_ids))
+                elif len(imdb_id_ints) > 1:
+                        statement += str(tuple(imdb_id_ints))
                 else:
-                        statement += "(" + str(imdb_ids[0]) + ")"
-                
-		self.cursor.execute(statement)
+                        statement += "(" + str(imdb_id_ints[0]) + ")"
+
+    		self.cursor.execute(statement)
 		result = self.cursor.fetchall()
 		if (len(result) == 0):
 			return -1

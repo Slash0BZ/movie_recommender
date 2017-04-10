@@ -96,7 +96,10 @@ def get_recommendation():
         result = []
         if our_ids_candidate_list != -1:
             predictor.getMovies(our_ids_candidate_list)
-            result = predictor.getRecommendations(num_recommendations)
+            prediction = predictor.getRecommendations(num_recommendations)
+            result = [int(x[0]) for x in prediction]
+            result = conv.mid2imdbid_batch(result)
+            
         return jsonify({"result": result}), 200
     else:
         #What to do if candidate_list is not given

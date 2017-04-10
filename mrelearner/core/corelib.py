@@ -275,13 +275,13 @@ class Predictor:
 
 		#bn.argpartition make sure elements before kth position is the smallest kth. (-movie_score means we get largest kth)
 		#http://berkeleyanalytics.com/bottleneck/reference.html#bottleneck.argpartition
-		idxs = bn.argpartition(-movie_score_all[:,1], num)[:num]
+		idxs = bn.argpartition(-movie_score_all[:,1], num)[:num+1]
 
 		movie_score = np.zeros((num,2))
 		movie_score = movie_score_all[idxs]
 
 		#only sort largest Kth element
-		movie_score[:num] = movie_score[np.argsort((-movie_score[:num, 1]))]
+		movie_score[:num+1] = movie_score[np.argsort((-movie_score[:num+1, 1]))]
 
 		self.movie_score = movie_score
 #		self.movie_score.sort(key = lambda x : x[1], reverse=True)
@@ -306,7 +306,10 @@ class Predictor:
 			num = self.movies.shape[0]
 
 		self.partitionLargestKth(num)
-		
+                
+                print self.movie_score.shape[0]
+                print self.movies.shape[0]
+                
 		for i in range(0, num):
 			m_score = self.movie_score[i].tolist()
 			ret.append(m_score)
