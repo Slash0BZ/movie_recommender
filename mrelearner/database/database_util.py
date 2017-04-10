@@ -141,7 +141,15 @@ class database:
 
 	# return movie_info (id,name,genre,year,imdb_id,feature) of selected movie ids in the m_ids list
 	def get_movie_info_batch(self, m_ids):
-		statement = "SELECT * FROM movie_info WHERE id IN " + str(tuple(m_ids))
+                statement = "SELECT * FROM movie_info WHERE id IN "
+
+                if len(m_ids) == 0:
+                        return -1
+                elif len(m_ids) > 1:
+                        statement += str(tuple(m_ids))
+                else:
+                        statement += "(" + str(m_ids[0]) + ")"
+                        
 		self.cursor.execute(statement)
 		result = self.cursor.fetchall()
 		if (len(result) == 0):
@@ -178,7 +186,14 @@ class database:
 	# see get_mid_from_imdbid
 	# get all associated (movielens) m_id in one database access
 	def get_mid_from_imdbid_batch(self, imdb_ids):
-		statement = "SELECT id FROM movie_info WHERE imdb_id IN " + str(tuple(imdb_ids))
+		statement = "SELECT id FROM movie_info WHERE imdb_id IN "
+                if len(imdb_ids) == 0:
+                        return -1
+                elif len(imdb_ids) > 1:
+                        statement += str(tuple(imdb_ids))
+                else:
+                        statement += "(" + str(imdb_ids[0]) + ")"
+                
 		self.cursor.execute(statement)
 		result = self.cursor.fetchall()
 		if (len(result) == 0):
@@ -189,7 +204,14 @@ class database:
 	#see get_imdbid_from_mid
 	# get all associated imdb_id in one database access
 	def get_imdbid_from_mid_batch(self, m_ids):
-		statement = "SELECT imdb_id FROM movie_info WHERE id IN " + str(tuple(m_ids))
+		statement = "SELECT imdb_id FROM movie_info WHERE id IN "
+                if len(m_ids) == 0:
+                        return -1
+                elif len(m_ids) > 1:
+                        statement += str(tuple(m_ids))
+                else:
+                        statement += "(" + str(m_ids[0]) + ")"
+                        
 		self.cursor.execute(statement)
 		result = self.cursor.fetchall()
 		if (len(result) == 0):

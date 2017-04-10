@@ -37,7 +37,7 @@ class Learner:
 	tag_learner = svm.SVC(probability=True)
 	average_rating = 0.0
 
-        
+        not_enough_history = False
         
 	def __init__(self, _u_id):
 		self.u_id = _u_id
@@ -110,6 +110,7 @@ class Learner:
 			print("[ERROR]: Feature set is not valid")
 		# 1: history length is too short
 		if (error_code == 1):
+                        self.not_enough_history = True
 			print("[ERROR]: Insufficient history")
 		else:
 			print("[ERROR]: Unknown error")
@@ -193,6 +194,11 @@ class Predictor:
 			return
 		g_model_64 = fromDB[0][1]
 		t_model_64 = fromDB[0][2]
+                if "[ONECLASS]::" in g_model_64:
+                        self.processError(3)
+			return
+                
+                
 		assert(g_model_64 != t_model_64)
 		#self.genre_model = base64.b64decode(g_model_64)
 		#self.tag_model = base64.b64decode(t_model_64)
