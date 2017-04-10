@@ -2,6 +2,8 @@
 
 Status:
 ![alt text](https://travis-ci.com/Slash0BZ/movie_recommender.svg?token=XxdMDeqYpxGFmYzEwzAd&branch=master "Status")
+[![codecov](https://codecov.io/gh/Slash0BZ/movie_recommender/branch/master/graph/badge.svg)](https://codecov.io/gh/Slash0BZ/movie_recommender)
+
 
 The learning part of the project movie recommender.
 
