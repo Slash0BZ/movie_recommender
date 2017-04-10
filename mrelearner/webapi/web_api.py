@@ -37,6 +37,7 @@ def hello_world():
 @app.route('/mrelearner/api/v1.0/history', methods=['POST'])
 @auth.login_required
 def update_history():
+    
     if not request.json: 
         abort(400)
     if not "user_id" in request.json:

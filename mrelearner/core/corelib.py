@@ -60,6 +60,9 @@ class Learner:
 
 	def getFeatures(self):
 		history = self.db.get_user_history(self.u_id)
+                print self.u_id
+                print history
+                
 		if (len(history) < 2):
 			self.processError(1)	
 
@@ -68,9 +71,16 @@ class Learner:
 			self.ratings.append(h[2])
 
 		info = self.db.get_movie_info_batch(self.movies)
+                print self.movies
+                print len(info)
+                print len(self.movies)
 		for i,m in enumerate(self.movies):
 			# TODO: Figure out how to do with empty tag
-			t = self.db.s2a(info[i][5])
+                        print i
+                        if len(info[i]) < 6:
+                                t = np.zeros(1128)
+                        else:
+			        t = self.db.s2a(info[i][5])
 			if  (t.shape[0] != 1128):
 				t = np.zeros(1128)
 			g = self.parser.genre2vec(info[i][2])

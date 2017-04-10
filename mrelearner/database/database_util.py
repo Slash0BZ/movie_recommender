@@ -161,6 +161,7 @@ class database:
 	# return non negative integer if match is found
 	# return -1 if no match, -2 if duplicate exists 
 	def get_mid_from_imdbid(self, imdb_id):
+                imdb_id = int(imdb_id)
 		self.cursor.execute("SELECT id FROM movie_info WHERE imdb_id=?", imdb_id)
 		result = self.cursor.fetchall()
 		if (len(result) == 0):

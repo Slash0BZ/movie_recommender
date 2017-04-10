@@ -13,7 +13,7 @@ def test_task():
 def update_history(uid, mid, rating, timestamp):
     db = database_util.database()
     db.add_user_history(uid, mid, rating, timestamp)
-    
+    print "added user " + str(uid) 
     learner = corelib.Learner(uid)
     if not learner.not_enough_history:
         learner.train()
