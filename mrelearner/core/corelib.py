@@ -37,7 +37,7 @@ class Learner:
 	tag_learner = svm.SVC(probability=True)
 	average_rating = 0.0
 
-        
+        not_enough_history = False
         
 	def __init__(self, _u_id):
 		self.u_id = _u_id
@@ -60,6 +60,9 @@ class Learner:
 
 	def getFeatures(self):
 		history = self.db.get_user_history(self.u_id)
+                print self.u_id
+                print history
+                
 		if (len(history) < 2):
 			self.processError(1)	
 
@@ -68,9 +71,16 @@ class Learner:
 			self.ratings.append(h[2])
 
 		info = self.db.get_movie_info_batch(self.movies)
+                print self.movies
+                print len(info)
+                print len(self.movies)
 		for i,m in enumerate(self.movies):
 			# TODO: Figure out how to do with empty tag
-			t = self.db.s2a(info[i][5])
+                        print i
+                        if len(info[i]) < 6:
+                                t = np.zeros(1128)
+                        else:
+			        t = self.db.s2a(info[i][5])
 			if  (t.shape[0] != 1128):
 				t = np.zeros(1128)
 			g = self.parser.genre2vec(info[i][2])
@@ -110,6 +120,7 @@ class Learner:
 			print("[ERROR]: Feature set is not valid")
 		# 1: history length is too short
 		if (error_code == 1):
+                        self.not_enough_history = True
 			print("[ERROR]: Insufficient history")
 		else:
 			print("[ERROR]: Unknown error")
@@ -193,6 +204,11 @@ class Predictor:
 			return
 		g_model_64 = fromDB[0][1]
 		t_model_64 = fromDB[0][2]
+                if "[ONECLASS]::" in g_model_64:
+                        self.processError(3)
+			return
+                
+                
 		assert(g_model_64 != t_model_64)
 		#self.genre_model = base64.b64decode(g_model_64)
 		#self.tag_model = base64.b64decode(t_model_64)
