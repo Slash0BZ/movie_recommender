@@ -39,7 +39,7 @@ class Learner:
 		self.genre_features = list()
 		self.tag_features = list()
 		self.classes = list()
-        self.not_enough_history = False
+		self.not_enough_history = False
 		self.average_rating = 0.0
 		self.getFeatures()
 		self.genClasses()
