@@ -182,7 +182,6 @@ class Predictor:
 		self.invalid_user = False
 		self.genre_learner = object()
 		self.tag_learner = object()
-		self.invalid_user = False
 		self.getModels()
 		if (self.onlyOneClass() == False and self.invalid_user == False):
 			self.loadModels()
