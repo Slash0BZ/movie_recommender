@@ -141,7 +141,15 @@ class database:
 
 	# return movie_info (id,name,genre,year,imdb_id,feature) of selected movie ids in the m_ids list
 	def get_movie_info_batch(self, m_ids):
-		statement = "SELECT * FROM movie_info WHERE id IN " + str(tuple(m_ids))
+                statement = "SELECT * FROM movie_info WHERE id IN "
+
+                if len(m_ids) == 0:
+                        return -1
+                elif len(m_ids) > 1:
+                        statement += str(tuple(m_ids))
+                else:
+                        statement += "(" + str(m_ids[0]) + ")"
+                        
 		self.cursor.execute(statement)
 		result = self.cursor.fetchall()
 		if (len(result) == 0):
@@ -153,6 +161,7 @@ class database:
 	# return non negative integer if match is found
 	# return -1 if no match, -2 if duplicate exists 
 	def get_mid_from_imdbid(self, imdb_id):
+                imdb_id = int(imdb_id)
 		self.cursor.execute("SELECT id FROM movie_info WHERE imdb_id=?", imdb_id)
 		result = self.cursor.fetchall()
 		if (len(result) == 0):
@@ -178,8 +187,18 @@ class database:
 	# see get_mid_from_imdbid
 	# get all associated (movielens) m_id in one database access
 	def get_mid_from_imdbid_batch(self, imdb_ids):
-		statement = "SELECT id FROM movie_info WHERE imdb_id IN " + str(tuple(imdb_ids))
-		self.cursor.execute(statement)
+		statement = "SELECT id FROM movie_info WHERE imdb_id IN "
+                imdb_id_ints = []
+                for i in imdb_ids:
+                        imdb_id_ints.append(int(i))
+                if len(imdb_id_ints) == 0:
+                        return -1
+                elif len(imdb_id_ints) > 1:
+                        statement += str(tuple(imdb_id_ints))
+                else:
+                        statement += "(" + str(imdb_id_ints[0]) + ")"
+
+    		self.cursor.execute(statement)
 		result = self.cursor.fetchall()
 		if (len(result) == 0):
 			return -1
@@ -189,7 +208,14 @@ class database:
 	#see get_imdbid_from_mid
 	# get all associated imdb_id in one database access
 	def get_imdbid_from_mid_batch(self, m_ids):
-		statement = "SELECT imdb_id FROM movie_info WHERE id IN " + str(tuple(m_ids))
+		statement = "SELECT imdb_id FROM movie_info WHERE id IN "
+                if len(m_ids) == 0:
+                        return -1
+                elif len(m_ids) > 1:
+                        statement += str(tuple(m_ids))
+                else:
+                        statement += "(" + str(m_ids[0]) + ")"
+                        
 		self.cursor.execute(statement)
 		result = self.cursor.fetchall()
 		if (len(result) == 0):

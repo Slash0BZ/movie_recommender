@@ -3,11 +3,26 @@ language: python
 python:
  - "2.7"
 
-install: 
- - sudo apt-get install unixodbc-dev
- - pip install -r requirements.txt
+dist: trusty
+sudo: required
 
-script: python mrelearner/tests/test.py
+install: 
+ - sudo apt-get install python-pip
+ - wget https://packages.microsoft.com/keys/microsoft.asc
+ - wget https://packages.microsoft.com/config/ubuntu/14.04/prod.list
+ - sudo apt-key add microsoft.asc
+ - sudo mv prod.list /etc/apt/sources.list.d/mssql.list
+ - sudo apt-get update
+ - sudo apt-get install unixodbc unixodbc-dev
+ - sudo pip install pyodbc==3.1.1
+ - sudo pip install codecov
+ - sudo pip install coverage
+ - sudo pip install -e .
+
+script: coverage run mrelearner/tests/test.py
+
+after_success:
+ - codecov --token=122111eb-a654-4bbb-beb4-a997ea97837b
 
 notifications:
   email: false

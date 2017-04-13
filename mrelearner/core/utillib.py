@@ -66,14 +66,13 @@ class Converter:
 class PoolGenerator:
 
 	db = object()
-	imdb_list = list()
-	m_id_list = list()
 	converter = object()
 
 	def __init__(self, input_list):
 		self.db = database_util.database()
 		self.converter = Converter()
 		self.imdb_list = input_list
+		self.m_id_list = list()
 		self.fill_m_id_list()
 
 	def fill_m_id_list(self):

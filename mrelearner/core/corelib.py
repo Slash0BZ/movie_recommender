@@ -25,28 +25,26 @@ class Learner:
 	here = path.abspath(path.dirname(__file__))
 	log_path = here + '/../log/'
 
-	u_id = 0
 	db = object()
 	parser = object()
-	movies = list()
-	ratings = list()
-	classes = list()
-	genre_features = list()
-	tag_features = list()
 	genre_learner = svm.SVC(probability=True)
 	tag_learner = svm.SVC(probability=True)
-	average_rating = 0.0
-
-        
         
 	def __init__(self, _u_id):
 		self.u_id = _u_id
 		self.db = database_util.database()
 		self.parser = mrlib.Parser()
+		self.movies = list()
+		self.ratings = list()
+		self.genre_features = list()
+		self.tag_features = list()
+		self.classes = list()
+		self.not_enough_history = False
+		self.average_rating = 0.0
 		self.getFeatures()
+		self.genClasses()
 		if (self.validateFeature() == False):
 			self.processError(0)
-		self.genClasses()
 
 
 	# Write a msg with time to the end of the log_file
@@ -60,6 +58,9 @@ class Learner:
 
 	def getFeatures(self):
 		history = self.db.get_user_history(self.u_id)
+                print self.u_id
+                print history
+                
 		if (len(history) < 2):
 			self.processError(1)	
 
@@ -68,9 +69,16 @@ class Learner:
 			self.ratings.append(h[2])
 
 		info = self.db.get_movie_info_batch(self.movies)
+                print self.movies
+                print len(info)
+                print len(self.movies)
 		for i,m in enumerate(self.movies):
 			# TODO: Figure out how to do with empty tag
-			t = self.db.s2a(info[i][5])
+                        print i
+                        if len(info[i]) < 6:
+                                t = np.zeros(1128)
+                        else:
+			        t = self.db.s2a(info[i][5])
 			if  (t.shape[0] != 1128):
 				t = np.zeros(1128)
 			g = self.parser.genre2vec(info[i][2])
@@ -110,6 +118,7 @@ class Learner:
 			print("[ERROR]: Feature set is not valid")
 		# 1: history length is too short
 		if (error_code == 1):
+                        self.not_enough_history = True
 			print("[ERROR]: Insufficient history")
 		else:
 			print("[ERROR]: Unknown error")
@@ -161,18 +170,18 @@ class Predictor:
 	u_id = 0
 	db = object()
 	parser = object()
-	genre_model = ''
-	tag_model = ''
-	genre_learner = object()
-	tag_learner = object()
-	movies = list()
-	movie_score = list()
-	invalid_user = False
 
 	def __init__(self, _u_id):
 		self.u_id = _u_id
 		self.db = database_util.database()
 		self.parser = mrlib.Parser()
+		self.genre_model = ''
+		self.tag_model = ''
+		self.movies = list()
+		self.movie_score = list()
+		self.invalid_user = False
+		self.genre_learner = object()
+		self.tag_learner = object()
 		self.getModels()
 		if (self.onlyOneClass() == False and self.invalid_user == False):
 			self.loadModels()
@@ -193,6 +202,11 @@ class Predictor:
 			return
 		g_model_64 = fromDB[0][1]
 		t_model_64 = fromDB[0][2]
+                if "[ONECLASS]::" in g_model_64:
+                        self.processError(3)
+			return
+                
+                
 		assert(g_model_64 != t_model_64)
 		#self.genre_model = base64.b64decode(g_model_64)
 		#self.tag_model = base64.b64decode(t_model_64)
@@ -260,13 +274,13 @@ class Predictor:
 
 		#bn.argpartition make sure elements before kth position is the smallest kth. (-movie_score means we get largest kth)
 		#http://berkeleyanalytics.com/bottleneck/reference.html#bottleneck.argpartition
-		idxs = bn.argpartition(-movie_score_all[:,1], num)[:num]
+		idxs = bn.argpartition(-movie_score_all[:,1], num)[:num+1]
 
 		movie_score = np.zeros((num,2))
 		movie_score = movie_score_all[idxs]
 
 		#only sort largest Kth element
-		movie_score[:num] = movie_score[np.argsort((-movie_score[:num, 1]))]
+		movie_score[:num+1] = movie_score[np.argsort((-movie_score[:num+1, 1]))]
 
 		self.movie_score = movie_score
 #		self.movie_score.sort(key = lambda x : x[1], reverse=True)
@@ -291,7 +305,10 @@ class Predictor:
 			num = self.movies.shape[0]
 
 		self.partitionLargestKth(num)
-		
+                
+                print self.movie_score.shape[0]
+                print self.movies.shape[0]
+                
 		for i in range(0, num):
 			m_score = self.movie_score[i].tolist()
 			ret.append(m_score)
