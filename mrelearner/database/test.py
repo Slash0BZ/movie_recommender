@@ -80,8 +80,23 @@ assert(d.exists_in_movie_info('Toy Story','Adventure|Animation|Children|Comedy|F
 print('pass test exists_in_movie_info() with some invalid input')
 
 #TODO
-#s2a
+#s2a to process tag
 #a2s
+m_id = d.get_all_movie_id()[:10]
+for i in m_id:
+	retval = d.get_movie_info(i)
+	#tag
+	tag = retval[5]
+	#tag str will be modified, but should be consistent after that
+	array1 = d.s2a(tag)
+	str1 = d.a2s(array1)
+	array2 = d.s2a(str1)
+	str2 = d.a2s(array2)
+	array3 = d.s2a(str2)
+	str3 = d.a2s(array3)
+	assert(str1 == str2)
+	assert(str2 == str3)
+print('pass s2a, a2s check')
 
 #get_mid_from_imdbid() and get_mid_from_imdbid_batch()
 #using get_movie_info()

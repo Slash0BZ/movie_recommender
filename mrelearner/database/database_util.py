@@ -114,8 +114,9 @@ class database:
 		for a in arr:
 			a = float(a)
 			a = a * 100.0
-			ret = ret + "|" + str(a)
-		return ret
+			ret = ret + str(a) + "|"
+		#remove last '|'
+		return ret[:-1]
 	
 	#array to string
 	#currently used only for spliting tag_feature
