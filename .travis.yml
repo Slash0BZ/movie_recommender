@@ -16,6 +16,7 @@ install:
  - sudo apt-get install unixodbc unixodbc-dev
  - sudo pip install pyodbc==3.1.1
  - sudo pip install codecov
+ - sudo pip install scipy
  - sudo pip install coverage
  - sudo pip install -e .
 
