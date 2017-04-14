@@ -1,4 +1,5 @@
 import database_util
+import datetime
 
 d = database_util.database()
 # d.add_user_history(1,14,5,123124)
@@ -14,7 +15,7 @@ d = database_util.database()
 print '===test==='
 
 
-
+test_uid = 1
 #test  get_movie_info()
 
 #check we can get movie_info using m_id from get_all_movie_id
@@ -138,8 +139,48 @@ for n in range(len(ret)):
 	assert(imdb_batch[n] == int(ret[n]))
 print('pass get_imdbid_from_mid and get_imdbid_from_mid_batch (check by get_movie_info)')
 
+
 #TODO user_history
+#check user history update with m_id already in record will replace the record
+history = d.get_user_history(test_uid)[0]
+mid = history[1]
+newRating = int(history[2]) + 1
+if newRating > 5:
+	newRating -= 5
+
+time = str(datetime.datetime.now())
+d.add_user_history(test_uid, mid, newRating, time)
+	#check
+history2 = d.get_user_history(test_uid)[0]
+assert(test_uid == int(history2[0]))
+assert(mid == int(history2[1]))
+assert(newRating == int(history2[2]))
+assert(time == history2[3])
+
+#revert to original value
+d.add_user_history(history[0], history[1], history[2], history[3])
+print('pass check user history update w/ replace the record')
+
 #TODO user_model
+#temp save values before test
+	#get first set of model
+original_models = d.get_user_model(test_uid)[0]	
+
+d.update_user_model(test_uid, '555','678')
+modified = d.get_user_model(test_uid)[0]
+assert(int(modified[0]) == test_uid)
+assert(modified[1] == '555')
+assert(modified[2] == '678')
+d.add_user_model(test_uid, '599','610', 1.3)
+modified = d.get_user_model(test_uid)[0]
+assert(int(modified[0]) == test_uid)
+assert(modified[1] == '599')
+assert(modified[2] == '610')
+assert(float(modified[3]) == 1.3)
+
+#revert to original value
+d.add_user_model(test_uid, original_models[1], original_models[2], original_models[3])
+print('pass check user model update w/ replace the record')
 
 #test caller_id from get_identifier(u_id) will get back u_id in get_uid(caller_id)
 i = 0 
