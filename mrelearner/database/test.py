@@ -16,6 +16,11 @@ print '===test==='
 
 
 test_uid = 1
+test_m_id = 0
+#create test movie
+d.add_movie(0, 'test_movie001', 'aa|aa', 1234)
+d.add_feature_to_movie(0, 0,'1.0|1.1')
+
 #test  get_movie_info()
 
 #check we can get movie_info using m_id from get_all_movie_id
@@ -28,7 +33,19 @@ for i in m_id:
 	assert retval[0] == i
 print('pass get movie_info using m_id from get_all_movie_id')
 
+#test add_movie cannot add movie name already in db
 
+
+
+retval = d.get_movie_info(test_m_id)
+d.add_movie(0, 'aaa', 'genre|genre2', 1221)
+ret2 = d.get_movie_info(test_m_id)
+
+assert(retval[0] == ret2[0])
+assert(retval[1] == ret2[1])
+assert(retval[2] == ret2[2])
+assert(retval[3] == ret2[3])
+print('pass test add_movie fail if m_id already exists')
 
 
 #check we cannot get movie_info not in m_id from get_all_movie_id
