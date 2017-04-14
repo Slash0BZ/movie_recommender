@@ -19,7 +19,7 @@ install:
  - sudo pip install coverage
  - sudo pip install -e .
 
-script: coverage run mrelearner/tests/test.py
+script: coverage run tests/test.py
 
 after_success:
  - codecov --token=122111eb-a654-4bbb-beb4-a997ea97837b
