@@ -1,6 +1,7 @@
 import database_util
 import re
 import sys
+import requests
 
 from mrelearner.train import mrlib
 
@@ -45,3 +46,16 @@ def import_feature():
 		feature = db.a2s(parser.get_movie_tag_vector_fast(int(i)))
 		imdb_id = parser.get_movie_imdb_id(int(i))
 		db.add_feature_to_movie(i, imdb_id, feature)
+
+def import_new_movies():
+	#genre_transform_table = [28:"Action", 12:"Adventure", 35:"Comedy", 80:"Crime", 99:"Documentary", 18:"Drama", 14:"Fantasy", 36:"Documentary"]
+	genreTransformTable = {'Adventure':[12], 'Animation':[16], 'Comedy':[35], 'Fantasy':[14], 'Romance':[10749], 'Drama':[18], 'Action':[28], 'Crime':[80], 'Thriller':[53], 'Horror':[27], 'Mystery':[9648], 'Sci-Fi':[878], 'Documentary':[99, 36], 'War':[10752], 'Musical':[10402], 'Western':[37]}
+	url = "https://api.themoviedb.org/3/genre/movie/list"
+	api_key = "0073589baa8cc3d53982b22d3833212e"
+	r = requests.get(url, data={"api_key":api_key})
+	print r.text
+	print 1
+
+import_new_movies()
+	
+	
