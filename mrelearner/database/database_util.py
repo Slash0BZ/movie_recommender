@@ -93,6 +93,12 @@ class database:
 			ret.append(a[0])
 		return ret
 
+	def get_next_movie_id(self):
+		self.cursor.execute("SELECT MAX(id) FROM movie_info")
+		result = self.cursor.fetchall()
+		cid = result[0][0]
+		return cid + 1
+
 	# Create a new column in the specified table
 	# Do nothing if the column_name is invalid or already exists
 	# Do nothing if column_type is invalid
