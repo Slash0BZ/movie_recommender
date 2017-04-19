@@ -90,7 +90,7 @@ class database:
 		if (self.exists_in_movie_info(name, genre, year)):
 			self.write_log("INSERT FAILURE DUE TO EXISTION %s %s %s" % (name, genre, year), 'movie_info')
 			return
-		self.cursor.execute("INSERT INTO movie_info (id,name,genre,year,imdb_id) VALUES (?,?,?,?,?)",m_id, name, genre, year, imdb_id)
+		self.cursor.execute("INSERT INTO movie_info (id,name,genre,year,imdb_id, tag_feature) VALUES (?,?,?,?,?,?)",m_id, name, genre, year, imdb_id, "")
 		self.cnxn.commit()
 
 	def get_info_from_imdbid(self, imdb_id):
@@ -170,16 +170,17 @@ class database:
 	#currently used only for spliting tag_feature
 	#convert "|" separated string into array of float
 	def s2a(self, s):
-		group = s.split("|")
+                print(s)
 		ret = np.zeros(1128)
-
-		for i in range(1128):
-			if(i>=len(group)):
-				break
-			if group[i] == '':
-				continue
-			ret[i] = float(group[i])
-		ret /= 100.0
+                if s:
+		        group = s.split("|")
+		        for i in range(1128):
+			        if(i>=len(group)):
+				        break
+			        if group[i] == '':
+				        continue
+			        ret[i] = float(group[i])
+		        ret /= 100.0
 		return ret
 	
 	# return movie_info (id,name,genre,year,imdb_id,feature) of selected movie id
