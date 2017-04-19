@@ -214,7 +214,8 @@ class database:
 		self.cursor.execute("SELECT id FROM movie_info WHERE imdb_id=?", imdb_id)
 		result = self.cursor.fetchall()
 		if (len(result) == 0):
-			return -1
+		        self.add_movie_by_imdbid(imdb_id)
+                        return self.get_mid_from_imdbid(imdb_id)
 		elif (len(result) >= 2):
 			return -2
 		else:
@@ -236,23 +237,29 @@ class database:
 	# see get_mid_from_imdbid
 	# get all associated (movielens) m_id in one database access
 	def get_mid_from_imdbid_batch(self, imdb_ids):
-		statement = "SELECT id FROM movie_info WHERE imdb_id IN "
-                imdb_id_ints = []
-                for i in imdb_ids:
-                        imdb_id_ints.append(int(i))
-                if len(imdb_id_ints) == 0:
-                        return -1
-                elif len(imdb_id_ints) > 1:
-                        statement += str(tuple(imdb_id_ints))
-                else:
-                        statement += "(" + str(imdb_id_ints[0]) + ")"
+                ret = []
+                for imdb_id in imdb_ids:
+                        mid = self.get_mid_from_imdbid(imdb_id)
+                        if mid >= 0
+                        ret.append(mid)
+                return ret
+		# statement = "SELECT id FROM movie_info WHERE imdb_id IN "
+                # imdb_id_ints = []
+                # for i in imdb_ids:
+                #         imdb_id_ints.append(int(i))
+                # if len(imdb_id_ints) == 0:
+                #         return -1
+                # elif len(imdb_id_ints) > 1:
+                #         statement += str(tuple(imdb_id_ints))
+                # else:
+                #         statement += "(" + str(imdb_id_ints[0]) + ")"
 
-    		self.cursor.execute(statement)
-		result = self.cursor.fetchall()
-		if (len(result) == 0):
-			return -1
-		else:
-			return [row[0] for row in result]
+    		# self.cursor.execute(statement)
+		# result = self.cursor.fetchall()
+		# if (len(result) == 0):
+		# 	return -1
+		# else:
+		# 	return [row[0] for row in result]
 
 	#see get_imdbid_from_mid
 	# get all associated imdb_id in one database access
