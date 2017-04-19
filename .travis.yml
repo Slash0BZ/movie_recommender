@@ -16,10 +16,11 @@ install:
  - sudo apt-get install unixodbc unixodbc-dev
  - sudo pip install pyodbc==3.1.1
  - sudo pip install codecov
+ - sudo pip install scipy
  - sudo pip install coverage
  - sudo pip install -e .
 
-script: coverage run mrelearner/tests/test.py
+script: coverage run tests/test.py
 
 after_success:
  - codecov --token=122111eb-a654-4bbb-beb4-a997ea97837b

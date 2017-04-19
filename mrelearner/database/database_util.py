@@ -5,6 +5,8 @@ import pyodbc
 import secret
 import datetime
 import os.path
+import json
+import requests
 from enum import Enum
 import numpy as np
 class database:
@@ -83,6 +85,46 @@ class database:
 		self.cursor.execute("INSERT INTO movie_info (id,name,genre,year) VALUES (?,?,?,?)",m_id, name, genre, year)
 		self.cnxn.commit()
 		self.write_log("INSERT movie_info %s %s %s" % (name, genre, year), 'movie_info')
+
+	def add_new_movie(self, m_id, name, genre, year, imdb_id):
+		if (self.exists_in_movie_info(name, genre, year)):
+			self.write_log("INSERT FAILURE DUE TO EXISTION %s %s %s" % (name, genre, year), 'movie_info')
+			return
+		self.cursor.execute("INSERT INTO movie_info (id,name,genre,year,imdb_id) VALUES (?,?,?,?,?)",m_id, name, genre, year, imdb_id)
+		self.cnxn.commit()
+
+	def get_info_from_imdbid(self, imdb_id):
+		url = "https://api.themoviedb.org/3/find/tt" + str(imdb_id)
+		api_key = "0073589baa8cc3d53982b22d3833212e"
+		external_source = "imdb_id"
+		r = requests.get(url, data={"api_key":api_key, "external_source":external_source})
+		info = json.loads(r.text)
+		return info["movie_results"][0]
+
+	def add_movie_by_imdbid(self, imdbid):
+		movie_info = self.get_info_from_imdbid(imdbid)
+		genreTransformTable = {'Adventure':[12], 'Animation':[16], 'Comedy':[35], 'Fantasy':[14], 'Romance':[10749], 'Drama':[18], 'Action':[28], 'Crime':[80], 'Thriller':[53], 'Horror':[27], 'Mystery':[9648], 'Sci-Fi':[878], 'Documentary':[99, 36], 'War':[10752], 'Musical':[10402], 'Western':[37]}
+		movie_year = movie_info["release_date"]
+		movie_year = movie_year[0:4]
+		movie_name = movie_info["title"]
+		genreList = movie_info["genre_ids"]
+		genreStringList = list()
+		for k in genreTransformTable.keys():
+			curList = genreTransformTable[k]
+			for c in curList:
+				if c in genreList:
+					genreStringList.append(k)
+					break
+		movie_genre = ""
+		for g in genreStringList:
+			movie_genre = movie_genre + g + "|"
+		movie_genre = movie_genre[0:len(movie_genre) - 1]
+		check = self.get_mid_from_imdbid(imdbid)
+		if (check == -1):
+			m_id = self.get_next_movie_id()
+			self.add_new_movie(m_id, movie_name, movie_genre, movie_year, imdbid)
+			
+		
 	
 	# Get a list of (movielens) movie ids from the database (movie id not equal to imdbid)
 	def get_all_movie_id(self):
@@ -92,6 +134,12 @@ class database:
 		for a in arr:
 			ret.append(a[0])
 		return ret
+
+	def get_next_movie_id(self):
+		self.cursor.execute("SELECT MAX(id) FROM movie_info")
+		result = self.cursor.fetchall()
+		cid = result[0][0]
+		return cid + 1
 
 	# Create a new column in the specified table
 	# Do nothing if the column_name is invalid or already exists
