@@ -119,10 +119,10 @@ class database:
 		for g in genreStringList:
 			movie_genre = movie_genre + g + "|"
 		movie_genre = movie_genre[0:len(movie_genre) - 1]
-		check = self.get_mid_from_imdbid(imdbid)
-		if (check == -1):
-			m_id = self.get_next_movie_id()
-			self.add_new_movie(m_id, movie_name, movie_genre, movie_year, imdbid)
+		#check = self.get_mid_from_imdbid(imdbid)
+                m_id = self.get_next_movie_id()
+		self.add_new_movie(m_id, movie_name, movie_genre, movie_year, imdbid)
+
 			
 		
 	
@@ -215,7 +215,7 @@ class database:
 		self.cursor.execute("SELECT id FROM movie_info WHERE imdb_id=?", imdb_id)
 		result = self.cursor.fetchall()
 		if (len(result) == 0):
-		        self.add_movie_by_imdbid(imdb_id)
+                        self.add_movie_by_imdbid(imdb_id)
                         return self.get_mid_from_imdbid(imdb_id)
 		elif (len(result) >= 2):
 			return -2
