@@ -87,8 +87,16 @@ run ```a2ensite mrelearner_webapi```
 
 Restart apache.
 
-Start Celery worker ```celery worker -A mrelearner.taskqueue.tasks```
+Install rabbitmq ``` sudo apt-get install rabbitmq-server ```
+
+Start Celery worker ```celery worker -A mrelearner.taskqueue.tasks --concurrency=1 &```
+
+## Testing
+
+The webapi was tested by manually issuing POST requests to the api.  The following cases were covered: Updating user history with a brand new user, updating user history with a user with insufficient history to train a model, updating user history with sufficient history to train a model, getting recommendations from a user that is not in the database, getting recommendations from a user with insufficient history to train a model, and getting recommendations from a user with sufficient history to train a model.
 
 ## Log
 
 Packaging was done on March 2017.
+
+
