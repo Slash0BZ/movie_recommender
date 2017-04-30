@@ -109,12 +109,15 @@ class Learner:
 		# 0: Feature is not valid
 		if (error_code == 0):
 			print("[ERROR]: Feature set is not valid")
+			return 0
 		# 1: history length is too short
 		if (error_code == 1):
                         self.not_enough_history = True
 			print("[ERROR]: Insufficient history")
+			return 1
 		else:
 			print("[ERROR]: Unknown error")
+			return 2
 	
 	def train_genre(self):
 		self.genre_learner.fit(self.genre_features, self.classes)				
