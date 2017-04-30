@@ -9,7 +9,6 @@ from mrelearner.train import mrlib
 db = database_util.database()
 movie_info_file = '../data/movies.csv'
 
-#read movie details from movie_info_file, and update online database
 def import_movie():
 	count = 0
 	f = open(movie_info_file, 'r')
@@ -39,7 +38,7 @@ def import_movie():
 	f.close()
 
 
-#read movie imdb_id and tags from files selected in parser, and append those information to  online database
+	
 def import_feature():
 	m_id = db.get_all_movie_id()
 	parser = mrlib.Parser()
@@ -49,7 +48,6 @@ def import_feature():
 		imdb_id = parser.get_movie_imdb_id(int(i))
 		db.add_feature_to_movie(i, imdb_id, feature)
 
-#print id of themoviedb according to the input imdb_id
 def get_tmdbid_from_imdbid(imdb_id):
 	url = "https://api.themoviedb.org/3/find/tt" + str(imdb_id)
 	api_key = "0073589baa8cc3d53982b22d3833212e"
@@ -59,7 +57,6 @@ def get_tmdbid_from_imdbid(imdb_id):
 	print db.get_next_movie_id()
 	print info['movie_results']
 
-#return imdb_id according to the input id of themoviedb
 def get_imdbid_from_tmdbid(tmdb_id):
 	url = "https://api.themoviedb.org/3/movie/" + str(tmdb_id)
 	api_key = "0073589baa8cc3d53982b22d3833212e"
@@ -67,7 +64,6 @@ def get_imdbid_from_tmdbid(tmdb_id):
 	info = json.loads(r.text)
 	return info["imdb_id"]	
 
-#grab a list of popular(new) movie, if any of them not in database, add those into online database 
 def import_popular_movies():
 	genreTransformTable = {'Adventure':[12], 'Animation':[16], 'Comedy':[35], 'Fantasy':[14], 'Romance':[10749], 'Drama':[18], 'Action':[28], 'Crime':[80], 'Thriller':[53], 'Horror':[27], 'Mystery':[9648], 'Sci-Fi':[878], 'Documentary':[99, 36], 'War':[10752], 'Musical':[10402], 'Western':[37]}
 	url = "https://api.themoviedb.org/3/movie/popular"
