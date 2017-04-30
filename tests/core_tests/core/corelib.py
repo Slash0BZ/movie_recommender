@@ -148,6 +148,7 @@ class Learner:
 		tag_model = pickle.dumps(self.tag_learner)
 		if (self.onlyOneClass()):
 			genre_model = "[ONECLASS]:" + str(self.classes[0])
+			print genre_model
 			tag_model = genre_model
 			
 		#genre_model = base64.b64encode(genre_model)
@@ -198,7 +199,7 @@ class Predictor:
 			return
 		g_model_64 = fromDB[0][1]
 		t_model_64 = fromDB[0][2]
-                if "[ONECLASS]::" in g_model_64:
+                if "[ONECLASS]:" in g_model_64:
                         self.processError(3)
 			return
                 

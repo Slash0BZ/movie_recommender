@@ -41,9 +41,20 @@ class TestMethods(unittest.TestCase):
 
 	def test_corelib_process_err(self):
 		learner = corelib.Learner(3)
+		learner.train()
+		learner.save_model()
 		self.assertEqual(learner.processError(0), 0)
 		learner.processError(1)
 		learner.processError(2)
+		learner = corelib.Learner(1)
+		learner.train()
+		learner.save_model()
+		predictor = corelib.Predictor(3)
+		predictor.processError(1)
+		predictor.processError(2)
+		predictor.processError(3)
+		predictor.processError(4)
+		predictor.getRecommendations(1)
 
 
 if __name__ == '__main__':
