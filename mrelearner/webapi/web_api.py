@@ -58,7 +58,7 @@ def update_history():
     our_mid = conv.imdbid2mid(movie_imdb_id)
     our_uid = conv.callerid2uid(user_id)
 
-    if our_mid != -1:
+    if our_mid >= 0:
         tasks.update_history.delay(our_uid, our_mid, user_rating, timestamp)
 
     #retrain the model

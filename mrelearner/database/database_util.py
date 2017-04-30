@@ -90,7 +90,7 @@ class database:
 		if (self.exists_in_movie_info(name, genre, year)):
 			self.write_log("INSERT FAILURE DUE TO EXISTION %s %s %s" % (name, genre, year), 'movie_info')
 			return
-		self.cursor.execute("INSERT INTO movie_info (id,name,genre,year,imdb_id) VALUES (?,?,?,?,?)",m_id, name, genre, year, imdb_id)
+		self.cursor.execute("INSERT INTO movie_info (id,name,genre,year,imdb_id, tag_feature) VALUES (?,?,?,?,?,?)",m_id, name, genre, year, imdb_id, "")
 		self.cnxn.commit()
 
 	def get_info_from_imdbid(self, imdb_id):
@@ -119,10 +119,10 @@ class database:
 		for g in genreStringList:
 			movie_genre = movie_genre + g + "|"
 		movie_genre = movie_genre[0:len(movie_genre) - 1]
-		check = self.get_mid_from_imdbid(imdbid)
-		if (check == -1):
-			m_id = self.get_next_movie_id()
-			self.add_new_movie(m_id, movie_name, movie_genre, movie_year, imdbid)
+		#check = self.get_mid_from_imdbid(imdbid)
+                m_id = self.get_next_movie_id()
+		self.add_new_movie(m_id, movie_name, movie_genre, movie_year, imdbid)
+
 			
 		
 	
@@ -170,20 +170,16 @@ class database:
 	#currently used only for spliting tag_feature
 	#convert "|" separated string into array of float
 	def s2a(self, s):
-		if s[0] == '|':
-			group = s[1:].split("|")
-		else:
-			group = s.split("|")
-
 		ret = np.zeros(1128)
-
-		for i in range(1128):
-			if(i>=len(group)):
-				break
-			if group[i] == '':
-				continue
-			ret[i] = float(group[i])
-		ret /= 100.0
+                if s:
+		        group = s.split("|")
+		        for i in range(1128):
+			        if(i>=len(group)):
+				        break
+			        if group[i] == '':
+				        continue
+			        ret[i] = float(group[i])
+		        ret /= 100.0
 		return ret
 	
 	# return movie_info (id,name,genre,year,imdb_id,feature) of selected movie id
@@ -218,7 +214,8 @@ class database:
 		self.cursor.execute("SELECT id FROM movie_info WHERE imdb_id=?", imdb_id)
 		result = self.cursor.fetchall()
 		if (len(result) == 0):
-			return -1
+                        self.add_movie_by_imdbid(imdb_id)
+                        return self.get_mid_from_imdbid(imdb_id)
 		elif (len(result) >= 2):
 			return -2
 		else:
@@ -240,23 +237,29 @@ class database:
 	# see get_mid_from_imdbid
 	# get all associated (movielens) m_id in one database access
 	def get_mid_from_imdbid_batch(self, imdb_ids):
-		statement = "SELECT id FROM movie_info WHERE imdb_id IN "
-                imdb_id_ints = []
-                for i in imdb_ids:
-                        imdb_id_ints.append(int(i))
-                if len(imdb_id_ints) == 0:
-                        return -1
-                elif len(imdb_id_ints) > 1:
-                        statement += str(tuple(imdb_id_ints))
-                else:
-                        statement += "(" + str(imdb_id_ints[0]) + ")"
+                ret = []
+                for imdb_id in imdb_ids:
+                        mid = self.get_mid_from_imdbid(imdb_id)
+                        if mid >= 0:
+                                ret.append(mid)
+                return ret
+		# statement = "SELECT id FROM movie_info WHERE imdb_id IN "
+                # imdb_id_ints = []
+                # for i in imdb_ids:
+                #         imdb_id_ints.append(int(i))
+                # if len(imdb_id_ints) == 0:
+                #         return -1
+                # elif len(imdb_id_ints) > 1:
+                #         statement += str(tuple(imdb_id_ints))
+                # else:
+                #         statement += "(" + str(imdb_id_ints[0]) + ")"
 
-    		self.cursor.execute(statement)
-		result = self.cursor.fetchall()
-		if (len(result) == 0):
-			return -1
-		else:
-			return [row[0] for row in result]
+    		# self.cursor.execute(statement)
+		# result = self.cursor.fetchall()
+		# if (len(result) == 0):
+		# 	return -1
+		# else:
+		# 	return [row[0] for row in result]
 
 	#see get_imdbid_from_mid
 	# get all associated imdb_id in one database access
