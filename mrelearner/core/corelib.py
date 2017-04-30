@@ -56,6 +56,7 @@ class Learner:
 		f.write(prepared_string)
 		f.close()
 
+	# get genre and tag feature and store them in self.genre_features and self.tag_features
 	def getFeatures(self):
 		history = self.db.get_user_history(self.u_id)
                 print self.u_id
@@ -85,6 +86,7 @@ class Learner:
 			self.genre_features.append(g)
 			self.tag_features.append(t)
 	
+	#classify rating into binary (good '1', bad '0')
 	def genClasses(self):
 		# TODO: solve the case that only one class is seen
 		# This causes learner to raise an error
@@ -99,6 +101,7 @@ class Learner:
 			else:
 				self.classes.append(0.0)
 	
+	#check size and shape of genre features, tag features, ratings vectors
 	def validateFeature(self):
 		if (len(self.ratings) != len(self.genre_features)):
 			return False
@@ -112,6 +115,7 @@ class Learner:
 				return False
 		return True
 	
+	#handle error according to error_code (int) 
 	def processError(self, error_code):
 		# 0: Feature is not valid
 		if (error_code == 0):
@@ -123,15 +127,18 @@ class Learner:
 		else:
 			print("[ERROR]: Unknown error")
 	
+	#fit genre feature with the binary class tag(good/bad rating)
 	def train_genre(self):
 		self.genre_learner.fit(self.genre_features, self.classes)				
 	
+	#fit tag feature with the binary class tag(good/bad rating)
 	def train_tag(self):
 		assert(len(self.tag_features) == len(self.classes))
 		for t in self.tag_features:
 			assert(t.shape[0] == 1128)
 		self.tag_learner.fit(self.tag_features, self.classes)
 	
+	#check homogenuity of the class tag (all good or all bad in class tag)
 	def onlyOneClass(self):
 		classTag = self.classes[0]
 		for i in range (1, len(self.classes)):
@@ -139,6 +146,7 @@ class Learner:
 				return False
 		return True
 
+	#train the model (include both genre and tag model)
 	def train(self):
 		if (self.onlyOneClass()):
 			return
@@ -147,6 +155,7 @@ class Learner:
 		self.train_tag()
 		self.write_log("user %s tag_model updated" % (self.u_id), "learner")
 	
+	#save the model into the (online) database 
 	def save_model(self):
 		genre_model = pickle.dumps(self.genre_learner)
 		tag_model = pickle.dumps(self.tag_learner)
@@ -195,6 +204,7 @@ class Predictor:
 		f.write(prepared_string)
 		f.close()
 	
+	#get tag and genre model (still in pickled form) from the (online) database, assign them to the self.genre_model, self.tag_model
 	def getModels(self):
 		fromDB = self.db.get_user_model(self.u_id)
 		if (len(fromDB) == 0):
@@ -213,15 +223,18 @@ class Predictor:
 		self.genre_model = g_model_64
 		self.tag_model = t_model_64
 	
+	#unpickle both tag and genre model
 	def loadModels(self):
 		self.genre_learner = pickle.loads(self.genre_model)
 		self.tag_learner = pickle.loads(self.tag_model)
 	
+	#save all movies into self.movies
 	def getMovies(self, _movies):
 		if (len(_movies) == 0):
 			self.processError(0)
 		self.movies = np.array(_movies)
 
+	#handle error according to error_code (int) 
 	def processError(self, error_code):
 		if (error_code == 0):
 			print("[ERROR]: Candidate movie list is empty")
@@ -287,12 +300,14 @@ class Predictor:
 
 		self.write_log("user %s movie_score %s" % (self.u_id, ' '.join(str(e) for e in self.movie_score)), "predictor")
 	
+	#check homogenuity of the class tag (all good or all bad in class tag)
 	def onlyOneClass(self):
 		group = self.genre_model.split(":")
 		if (group[0] == "[ONECLASS]"):
 			return True
 		return False
 	
+	# get movie recommendation as a list, each element in the form (movie_id, score), number of recommendation is specified by num (len(self.movies) > num > 1).
 	def getRecommendations(self, num):
 		if (self.onlyOneClass()):
 			self.processError(1)

@@ -162,15 +162,14 @@ class database:
 		for a in arr:
 			a = float(a)
 			a = a * 100.0
-			ret = ret + str(a) + "|"
+			ret += '|' + str(a)
 		#remove last '|'
-		return ret[:-1]
+		return ret
 	
 	#array to string
 	#currently used only for spliting tag_feature
 	#convert "|" separated string into array of float
 	def s2a(self, s):
-                print(s)
 		ret = np.zeros(1128)
                 if s:
 		        group = s.split("|")
