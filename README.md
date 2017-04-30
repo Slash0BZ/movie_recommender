@@ -87,6 +87,8 @@ run ```a2ensite mrelearner_webapi```
 
 Restart apache.
 
+Start Celery worker ```celery worker -A mrelearner.taskqueue.tasks```
+
 ## Log
 
 Packaging was done on March 2017.
