@@ -21,6 +21,13 @@ test_m_id = 0
 d.add_movie(0, 'test_movie001', 'aa|aa', 1234)
 d.add_feature_to_movie(0, 0,'1.0|1.1')
 
+#get_next_movie_id
+m_id = d.get_all_movie_id()
+new_id = d.get_new_movie_id()
+assert(new_id not in m_id)
+assert(new_id > m_id[-1])
+print('pass get_new_movie_id retval not in existing m_id')	
+
 #test  get_movie_info()
 
 #check we can get movie_info using m_id from get_all_movie_id
@@ -36,7 +43,7 @@ print('pass get movie_info using m_id from get_all_movie_id')
 #test add_movie cannot add movie name already in db
 
 
-
+#get (0, 'test_movie001', 'aa|aa', 1234)
 retval = d.get_movie_info(test_m_id)
 d.add_movie(0, 'aaa', 'genre|genre2', 1221)
 ret2 = d.get_movie_info(test_m_id)
@@ -155,6 +162,12 @@ ret = d.get_imdbid_from_mid_batch(m_id)
 for n in range(len(ret)):
 	assert(imdb_batch[n] == int(ret[n]))
 print('pass get_imdbid_from_mid and get_imdbid_from_mid_batch (check by get_movie_info)')
+
+#add_movie_by_imdbid
+m_id = d.get_all_movie_id()
+ret = d.get_imdbid_from_mid(m_id[-1])
+assert(d.add_movie_by_imdbid(ret) == False)
+
 
 
 #TODO user_history
