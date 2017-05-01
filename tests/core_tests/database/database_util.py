@@ -16,32 +16,11 @@ class database:
 	def connect(self):
 		print "Pseudo connect called"
 
-	def disconnect(self):
-		print "Pseudo disconnect called"
-
-	def write_log(self, msg, log_file_name):
-		log_file = self.log_path + log_file_name + ".log"
-		time_string = str(datetime.datetime.now())
-		prepared_string = "[%s]: %s \n" % (time_string, msg)
-		f = open(log_file, 'a')
-		f.write(prepared_string)
-		f.close()
-
-	def a2s(self, arr):
-		ret = ''
-		for a in arr:
-			a = float(a)
-			a = a * 100.0
-			ret = ret + "|" + str(a)
-		return ret
-	
 	def s2a(self, s):
 		group = s.split("|")
 		ret = np.zeros(1128)
 
 		for i in range(1128):
-			if(i>=len(group)):
-				break
 			if group[i] == '':
 				continue
 			ret[i] = float(group[i])
@@ -55,7 +34,8 @@ class database:
 			line = line.strip("\n")
 			line = line.strip("\r")
 			info = line.split("\t")
-			return info
+			if (int(info[0]) == int(m_id)):
+				return info
 		return list()
 
 	def get_movie_info_batch(self, m_ids):
@@ -85,18 +65,6 @@ class database:
 			if (int(info[0]) == int(m_id)):
 				return info[4]
 		return 0
-
-	def get_mid_from_imdbid_batch(self, imdb_ids):
-		ret = list()
-		for imdb_id in imdb_ids:
-			ret.append(self.get_mid_from_imdbid(imdb_id))
-		return ret
-
-	def get_imdbid_from_mid_batch(self, m_ids):
-		ret = list()
-		for m_id in m_ids:
-			ret.append(self.get_imdbid_from_mid(m_id))
-		return ret
 
 	def get_user_history(self, u_id):
 		ret = list()
