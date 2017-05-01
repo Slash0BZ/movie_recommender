@@ -105,8 +105,7 @@ The testing procedure is conducted via Travis-CI, the online unit tester and the
 
 As noted above, database testing can only be done locally. So we wrote the [testing script](https://github.com/Slash0BZ/movie_recommender/blob/master/mrelearner/database/test.py) under the local directory which throughly tested every function of working database_util library. The test script also reach line coverage of 81%, which only corner cases are not covered. However, we still do manual test and checking for those corner cases (for example, when adding new movies into the database).
 
+
 ## Log
 
 Packaging was done on March 2017.
-
-

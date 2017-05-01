@@ -86,13 +86,22 @@ class database:
 		self.cnxn.commit()
 		self.write_log("INSERT movie_info %s %s %s" % (name, genre, year), 'movie_info')
 
+	#Add a movie to movie_info with name, genre, year, imdb_id
+	#check whether imdb_id or movie already exist in db
+	#True if successfully added, False if not 
 	def add_new_movie(self, m_id, name, genre, year, imdb_id):
 		if (self.exists_in_movie_info(name, genre, year)):
 			self.write_log("INSERT FAILURE DUE TO EXISTION %s %s %s" % (name, genre, year), 'movie_info')
-			return
+			return False
+		if (self.get_mid_from_imdbid >= 0):
+			self.write_log("INSERT FAILURE DUE TO EXISTION %s %s %s %s" % (name, genre, year, imdb_id), 'movie_info')
+			return False
+		
 		self.cursor.execute("INSERT INTO movie_info (id,name,genre,year,imdb_id, tag_feature) VALUES (?,?,?,?,?,?)",m_id, name, genre, year, imdb_id, "")
 		self.cnxn.commit()
+		return True
 
+	# get new movie info from themoviedb api
 	def get_info_from_imdbid(self, imdb_id):
 		url = "https://api.themoviedb.org/3/find/tt" + str(imdb_id)
 		api_key = "0073589baa8cc3d53982b22d3833212e"
@@ -101,6 +110,8 @@ class database:
 		info = json.loads(r.text)
 		return info["movie_results"][0]
 
+	#call get_info_from_imdbid and add_new_movie
+	#parse data from get_info_from_imdbid and add it to db
 	def add_movie_by_imdbid(self, imdbid):
 		movie_info = self.get_info_from_imdbid(imdbid)
 		genreTransformTable = {'Adventure':[12], 'Animation':[16], 'Comedy':[35], 'Fantasy':[14], 'Romance':[10749], 'Drama':[18], 'Action':[28], 'Crime':[80], 'Thriller':[53], 'Horror':[27], 'Mystery':[9648], 'Sci-Fi':[878], 'Documentary':[99, 36], 'War':[10752], 'Musical':[10402], 'Western':[37]}
@@ -119,9 +130,8 @@ class database:
 		for g in genreStringList:
 			movie_genre = movie_genre + g + "|"
 		movie_genre = movie_genre[0:len(movie_genre) - 1]
-		#check = self.get_mid_from_imdbid(imdbid)
-                m_id = self.get_next_movie_id()
-		self.add_new_movie(m_id, movie_name, movie_genre, movie_year, imdbid)
+		m_id = self.get_new_movie_id()
+		return self.add_new_movie(m_id, movie_name, movie_genre, movie_year, imdbid)
 
 			
 		
@@ -135,7 +145,7 @@ class database:
 			ret.append(a[0])
 		return ret
 
-	def get_next_movie_id(self):
+	def get_new_movie_id(self):
 		self.cursor.execute("SELECT MAX(id) FROM movie_info")
 		result = self.cursor.fetchall()
 		cid = result[0][0]
@@ -171,15 +181,17 @@ class database:
 	#convert "|" separated string into array of float
 	def s2a(self, s):
 		ret = np.zeros(1128)
-                if s:
-		        group = s.split("|")
-		        for i in range(1128):
-			        if(i>=len(group)):
-				        break
-			        if group[i] == '':
-				        continue
-			        ret[i] = float(group[i])
-		        ret /= 100.0
+		if s:
+			if s[0] == '|':
+				s = s[1:]
+			group = s.split("|")
+			for i in range(1128):
+				if(i>=len(group)):
+					break
+				if group[i] == '':
+					ret[i] = 0.
+				ret[i] = float(group[i])
+			ret /= 100.0
 		return ret
 	
 	# return movie_info (id,name,genre,year,imdb_id,feature) of selected movie id
@@ -214,8 +226,7 @@ class database:
 		self.cursor.execute("SELECT id FROM movie_info WHERE imdb_id=?", imdb_id)
 		result = self.cursor.fetchall()
 		if (len(result) == 0):
-                        self.add_movie_by_imdbid(imdb_id)
-                        return self.get_mid_from_imdbid(imdb_id)
+			return -1
 		elif (len(result) >= 2):
 			return -2
 		else:
