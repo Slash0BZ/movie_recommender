@@ -14,11 +14,13 @@ We provide an API for the front end to use the recommendation services.
 
 ## Learning Algorithm Guideline
 
-We used a dataset from [MovieLens](https://movielens.org), which contains about 27,000 movies. Each movies is associated with a 1128 long tag vector, which represents the "features" of a movie. We used this vector as the main feature vector of a movie, combining with Genres to achieve the final feature vector. 
+We used a dataset from [MovieLens](https://movielens.org), which contains about 27,000 movies. Each movies is associated with a 1128 long tag vector, which represents the "features" of a movie. We used this vector as the main feature vector of a movie, combining with Genres to achieve the final feature vector.
 
-We used a SVM learner which predicts a binary tag (like / dislike) for every user on each movie. There is a score associated with the prediction so that we can rate and sort the candidate list that front end API passes with the likelihood that the user is going to like the movie. 
+We used this method to produce the feature vector since this is the most applicable way to construct our learning structure. Using a consistent feature vector enables us to generate predictions based on the dataset we have, without being too overdemanding. 
 
-We tested and tuned our learner using the real-world user ratings that MovieLens provides.
+For the learning algorithm, we used Support Vector Machine to predict a binary label (above-average-rating/below-average-rating) for each movie. The definition of the label is if a movie is rated a score above the specific user’s average score, then it is above-average-rating, vice versa. The average rating changes dynamically every time a user adds a movie, so we train the model every time.
+
+The reason we picked SVM is because it performed the best. In `mrelearner/train/mrlib.py` we implemented several test learner and tested the learners on the real world user ratings that MovieLens dataset provides, SVM achieved the best result for correctly predicting the binary label.
 
 ## Code and File Structure
 
@@ -104,9 +106,3 @@ The testing procedure is conducted via Travis-CI, the online unit tester and the
 ### Database testing
 
 As noted above, database testing can only be done locally. So we wrote the [testing script](https://github.com/Slash0BZ/movie_recommender/blob/master/mrelearner/database/test.py) under the local directory which throughly tested every function of working database_util library. The test script also reach line coverage of 81%, which only corner cases are not covered. However, we still do manual test and checking for those corner cases (for example, when adding new movies into the database).
-
-## Log
-
-Packaging was done on March 2017.
-
-
